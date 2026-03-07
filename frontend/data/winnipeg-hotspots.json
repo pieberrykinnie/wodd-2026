@@ -1,0 +1,179 @@
+{
+  "office": [
+    {
+      "id": "exchange-district",
+      "name": "Exchange District",
+      "lat": 49.8978,
+      "lng": -97.1424,
+      "description": "Historic brick warehouses converted to Class A office space. Walking distance to restaurants and cultural venues.",
+      "officeRent": 16,
+      "vacancyRate": "8.2%",
+      "size": "up to 80,000 sqft",
+      "highlights": ["Heritage architecture", "Fiber-ready buildings", "Restaurant row proximity", "Arts district adjacent"],
+      "transitScore": 85,
+      "nearbyAmenities": ["The Forks Market", "MTS Centre", "Multiple restaurants"]
+    },
+    {
+      "id": "true-north-square",
+      "name": "True North Square",
+      "lat": 49.8929,
+      "lng": -97.1434,
+      "description": "Modern mixed-use development. LEED Gold certified towers housing Manitoba Hydro and major law firms.",
+      "officeRent": 22,
+      "vacancyRate": "5.1%",
+      "size": "up to 220,000 sqft",
+      "highlights": ["LEED Gold certified", "Skyway connected", "Retail podium", "Premium finishes"],
+      "transitScore": 90,
+      "nearbyAmenities": ["Canada Life Centre", "Retail village", "Underground parking"]
+    },
+    {
+      "id": "downtown-core",
+      "name": "Downtown Core",
+      "lat": 49.8951,
+      "lng": -97.1384,
+      "description": "Central business district towers with the highest transit connectivity in the city.",
+      "officeRent": 18,
+      "vacancyRate": "11.4%",
+      "size": "up to 150,000 sqft",
+      "highlights": ["Multiple transit lines", "Skyway network", "Food court access", "Financial district"],
+      "transitScore": 92,
+      "nearbyAmenities": ["Portage Place", "Various dining", "Banks and services"]
+    },
+    {
+      "id": "st-boniface",
+      "name": "St. Boniface Innovation",
+      "lat": 49.8902,
+      "lng": -97.1131,
+      "description": "Emerging bilingual tech campus adjacent to the Canadian Museum for Human Rights.",
+      "officeRent": 14,
+      "vacancyRate": "6.8%",
+      "size": "up to 45,000 sqft",
+      "highlights": ["Bilingual workforce pool", "University Health Sciences campus", "Riverside setting", "Innovation district"],
+      "transitScore": 72,
+      "nearbyAmenities": ["CMHR", "Red River access", "Café row on Provencher"]
+    }
+  ],
+  "neighborhood": [
+    {
+      "id": "osborne-village",
+      "name": "Osborne Village",
+      "lat": 49.878,
+      "lng": -97.1365,
+      "description": "Vibrant urban village with cafés, galleries, and the city's most walkable streets.",
+      "avgHomePrice": 420000,
+      "avgRent1br": 1250,
+      "avgRent2br": 1650,
+      "commuteToCore": 12,
+      "walkscore": 82,
+      "persona": "Urban Creative",
+      "personaColor": "#D89C3D",
+      "highlights": ["Walkable café culture", "Independent galleries", "River walk access", "Active social scene"]
+    },
+    {
+      "id": "river-heights",
+      "name": "River Heights",
+      "lat": 49.8762,
+      "lng": -97.1639,
+      "description": "Tree-lined streets, top-rated schools, and family-friendly parks. Quiet streets, warm community.",
+      "avgHomePrice": 385000,
+      "avgRent1br": 1150,
+      "avgRent2br": 1850,
+      "commuteToCore": 18,
+      "walkscore": 65,
+      "persona": "Young Family",
+      "personaColor": "#5E8C6A",
+      "highlights": ["Top-rated public schools", "Mature tree canopy", "Recreation centres", "Strong community leagues"]
+    },
+    {
+      "id": "tuxedo",
+      "name": "Tuxedo",
+      "lat": 49.854,
+      "lng": -97.1987,
+      "description": "Winnipeg's most prestigious enclave. Executive homes, golf courses, and a quiet authority.",
+      "avgHomePrice": 650000,
+      "avgRent1br": 1800,
+      "avgRent2br": 2800,
+      "commuteToCore": 22,
+      "walkscore": 52,
+      "persona": "Tech Executive",
+      "personaColor": "#B23A2B",
+      "highlights": ["Executive housing stock", "Assiniboine Country Club", "Private feel", "Prestige address"]
+    },
+    {
+      "id": "wolseley",
+      "name": "Wolseley",
+      "lat": 49.8881,
+      "lng": -97.1721,
+      "description": "Known as 'The Republic of Wolseley.' Arts-forward, progressive community with historic character homes.",
+      "avgHomePrice": 340000,
+      "avgRent1br": 1050,
+      "avgRent2br": 1400,
+      "commuteToCore": 14,
+      "walkscore": 73,
+      "persona": "Urban Creative",
+      "personaColor": "#D89C3D",
+      "highlights": ["Artists and makers community", "Farmers markets", "Historic character homes", "Cycling routes"]
+    },
+    {
+      "id": "st-vital",
+      "name": "St. Vital",
+      "lat": 49.8493,
+      "lng": -97.0969,
+      "description": "Growing family-oriented suburb with new construction, park space, and excellent value.",
+      "avgHomePrice": 370000,
+      "avgRent1br": 1100,
+      "avgRent2br": 1500,
+      "commuteToCore": 25,
+      "walkscore": 58,
+      "persona": "Young Family",
+      "personaColor": "#5E8C6A",
+      "highlights": ["New construction options", "St. Vital Park", "Large lots", "Growing schools"]
+    }
+  ],
+  "lifestyle": [
+    {
+      "id": "the-forks",
+      "name": "The Forks",
+      "lat": 49.8883,
+      "lng": -97.1302,
+      "description": "National Historic Site at the confluence of the Red and Assiniboine rivers. Year-round market, events, and trails.",
+      "type": "Cultural Hub",
+      "typeColor": "#C8A44D",
+      "highlights": ["River Trail access", "Year-round events", "Market Hall dining", "Winter skating rink on the river"],
+      "visitorsPerYear": "4M+"
+    },
+    {
+      "id": "assiniboine-park",
+      "name": "Assiniboine Park",
+      "lat": 49.869,
+      "lng": -97.2276,
+      "description": "400+ acre urban park. Zoo, conservatory, sculpture garden, winter lighting festival.",
+      "type": "Green Space",
+      "typeColor": "#5E8C6A",
+      "highlights": ["Assiniboine Park Zoo", "Leo Mol Sculpture Garden", "Pavilion Gallery", "Lumière light festival"],
+      "visitorsPerYear": "2.5M+"
+    },
+    {
+      "id": "cmhr",
+      "name": "Canadian Museum for Human Rights",
+      "lat": 49.8888,
+      "lng": -97.1314,
+      "description": "World's first museum dedicated solely to human rights. Iconic architecture. Steps from The Forks.",
+      "type": "Culture & Arts",
+      "typeColor": "#4C6E91",
+      "highlights": ["International programming", "Iconic alabaster tower", "Adjacent to The Forks", "Educational programs"],
+      "visitorsPerYear": "250K+"
+    },
+    {
+      "id": "the-exchange",
+      "name": "Exchange District",
+      "lat": 49.8978,
+      "lng": -97.1424,
+      "description": "Canada's most intact collection of early 20th century commercial architecture. Now home to bars, studios, and galleries.",
+      "type": "Entertainment",
+      "typeColor": "#B23A2B",
+      "highlights": ["Jazz Winnipeg stages", "Craft cocktail bars", "Art galleries", "Restaurant row on Adelaide"],
+      "visitorsPerYear": "1M+"
+    }
+  ]
+}
