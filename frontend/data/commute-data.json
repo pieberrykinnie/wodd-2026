@@ -1,0 +1,76 @@
+{
+  "cities": {
+    "toronto": {
+      "label": "Toronto",
+      "avgCommuteMins": 75,
+      "pctOver60Mins": 52,
+      "transitCommuters": 0.34,
+      "drivingCommuters": 0.48,
+      "activeCommuters": 0.05,
+      "workFromHome": 0.13,
+      "annualHoursLost": 306,
+      "stressIndex": 8.2,
+      "neighborhoods": [
+        { "name": "North York", "mins": 68, "mode": "Subway + bus" },
+        { "name": "Mississauga", "mins": 82, "mode": "GO Train + subway" },
+        { "name": "Scarborough", "mins": 74, "mode": "Subway + bus" },
+        { "name": "Etobicoke", "mins": 61, "mode": "Subway" },
+        { "name": "Markham", "mins": 90, "mode": "GO Train" }
+      ]
+    },
+    "vancouver": {
+      "label": "Vancouver",
+      "avgCommuteMins": 62,
+      "pctOver60Mins": 38,
+      "transitCommuters": 0.38,
+      "drivingCommuters": 0.42,
+      "activeCommuters": 0.07,
+      "workFromHome": 0.13,
+      "annualHoursLost": 253,
+      "stressIndex": 7.4,
+      "neighborhoods": [
+        { "name": "Surrey", "mins": 75, "mode": "SkyTrain" },
+        { "name": "Burnaby", "mins": 42, "mode": "SkyTrain" },
+        { "name": "Richmond", "mins": 52, "mode": "Canada Line" },
+        { "name": "North Van", "mins": 55, "mode": "SeaBus + bus" },
+        { "name": "Coquitlam", "mins": 68, "mode": "Millennium Line" }
+      ]
+    },
+    "montreal": {
+      "label": "Montréal",
+      "avgCommuteMins": 52,
+      "pctOver60Mins": 29,
+      "transitCommuters": 0.44,
+      "drivingCommuters": 0.36,
+      "activeCommuters": 0.09,
+      "workFromHome": 0.11,
+      "annualHoursLost": 213,
+      "stressIndex": 6.1,
+      "neighborhoods": [
+        { "name": "Laval", "mins": 60, "mode": "Metro + bus" },
+        { "name": "Longueuil", "mins": 48, "mode": "Metro Yellow" },
+        { "name": "Plateau", "mins": 28, "mode": "Metro" },
+        { "name": "Rosemont", "mins": 32, "mode": "Metro" },
+        { "name": "Côte-des-Neiges", "mins": 38, "mode": "Metro" }
+      ]
+    },
+    "winnipeg": {
+      "label": "Winnipeg",
+      "avgCommuteMins": 20,
+      "pctOver60Mins": 4,
+      "transitCommuters": 0.18,
+      "drivingCommuters": 0.68,
+      "activeCommuters": 0.08,
+      "workFromHome": 0.06,
+      "annualHoursLost": 82,
+      "stressIndex": 3.2,
+      "neighborhoods": [
+        { "name": "Osborne Village", "mins": 12, "mode": "Drive or bike" },
+        { "name": "River Heights", "mins": 18, "mode": "Drive" },
+        { "name": "Tuxedo", "mins": 22, "mode": "Drive" },
+        { "name": "St. Vital", "mins": 25, "mode": "Drive" },
+        { "name": "Wolseley", "mins": 14, "mode": "Drive or bike" }
+      ]
+    }
+  }
+}

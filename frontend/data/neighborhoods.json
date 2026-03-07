@@ -1,0 +1,80 @@
+[
+  {
+    "id": "exchange-district",
+    "name": "Exchange District",
+    "coords": [-97.1424, 49.8978],
+    "commuteMins": 5,
+    "transitRoutes": ["16", "18", "Downtown Spirit"],
+    "walkScore": 88,
+    "avgRent1br": 1200,
+    "avgRent2br": 1700,
+    "avgHomePrice": 450000,
+    "description": "Converted heritage lofts in the heart of the office district.",
+    "persona": "Urban Creative"
+  },
+  {
+    "id": "osborne-village",
+    "name": "Osborne Village",
+    "coords": [-97.1365, 49.878],
+    "commuteMins": 12,
+    "transitRoutes": ["18", "60"],
+    "walkScore": 82,
+    "avgRent1br": 1250,
+    "avgRent2br": 1650,
+    "avgHomePrice": 420000,
+    "description": "The city's most vibrant walkable urban neighbourhood.",
+    "persona": "Urban Creative"
+  },
+  {
+    "id": "river-heights",
+    "name": "River Heights",
+    "coords": [-97.1639, 49.8762],
+    "commuteMins": 18,
+    "transitRoutes": ["29", "21"],
+    "walkScore": 65,
+    "avgRent1br": 1150,
+    "avgRent2br": 1850,
+    "avgHomePrice": 385000,
+    "description": "Tree-lined streets, top-ranked schools, and strong community leagues.",
+    "persona": "Young Family"
+  },
+  {
+    "id": "wolseley",
+    "name": "Wolseley",
+    "coords": [-97.1721, 49.8881],
+    "commuteMins": 14,
+    "transitRoutes": ["21", "18"],
+    "walkScore": 73,
+    "avgRent1br": 1050,
+    "avgRent2br": 1400,
+    "avgHomePrice": 340000,
+    "description": "'The Republic of Wolseley.' Artist studios, character homes, bike lanes.",
+    "persona": "Urban Creative"
+  },
+  {
+    "id": "tuxedo",
+    "name": "Tuxedo",
+    "coords": [-97.1987, 49.854],
+    "commuteMins": 22,
+    "transitRoutes": ["29"],
+    "walkScore": 52,
+    "avgRent1br": 1800,
+    "avgRent2br": 2800,
+    "avgHomePrice": 650000,
+    "description": "Prestige executive neighbourhood. Golf, privacy, quiet authority.",
+    "persona": "Tech Executive"
+  },
+  {
+    "id": "st-vital",
+    "name": "St. Vital",
+    "coords": [-97.0969, 49.8493],
+    "commuteMins": 25,
+    "transitRoutes": ["60", "16B"],
+    "walkScore": 58,
+    "avgRent1br": 1100,
+    "avgRent2br": 1500,
+    "avgHomePrice": 370000,
+    "description": "New construction, large lots, excellent school catchment.",
+    "persona": "Young Family"
+  }
+]

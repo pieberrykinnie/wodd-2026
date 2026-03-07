@@ -1,0 +1,97 @@
+[
+  {
+    "id": "exchange-district",
+    "name": "Exchange District",
+    "description": "Winnipeg's creative and tech hub with heritage architecture, co-working spaces, and a vibrant arts scene.",
+    "persona": "urban-creative",
+    "persona_label": "The Urban Creative",
+    "category": "office",
+    "lat": 49.8992,
+    "lng": -97.1384,
+    "neighbourhood_names": ["EXCHANGE DISTRICT"],
+    "highlights": [
+      "National Historic Site",
+      "Tech startup cluster",
+      "Walkable",
+      "Arts & culture hub"
+    ],
+    "office_vibe": "Creative lofts and heritage conversions",
+    "transit_radius_m": 500
+  },
+  {
+    "id": "downtown",
+    "name": "Downtown",
+    "description": "The central business district with major office towers, proximity to The Forks, and excellent transit connectivity.",
+    "persona": "tech-executive",
+    "persona_label": "The Tech Executive",
+    "category": "office",
+    "lat": 49.8915,
+    "lng": -97.1434,
+    "neighbourhood_names": ["SOUTH PORTAGE", "PORTAGE-ELLICE", "BROADWAY-ASSINIBOINE", "PORTAGE & MAIN", "CHINA TOWN", "THE FORKS"],
+    "highlights": [
+      "Central business district",
+      "True North Square",
+      "The Forks nearby",
+      "Transit hub"
+    ],
+    "office_vibe": "Traditional office towers and modern developments",
+    "transit_radius_m": 500
+  },
+  {
+    "id": "osborne-village",
+    "name": "Osborne Village",
+    "description": "Winnipeg's densest and most walkable neighbourhood with eclectic shops, restaurants, and a young professional demographic.",
+    "persona": "young-professional",
+    "persona_label": "The Young Professional",
+    "category": "neighborhood",
+    "lat": 49.8780,
+    "lng": -97.1458,
+    "neighbourhood_names": ["ROSLYN", "RIVER-OSBORNE"],
+    "highlights": [
+      "Most walkable neighbourhood",
+      "Restaurant & cafe scene",
+      "Young professionals",
+      "Boutique retail"
+    ],
+    "office_vibe": "Boutique offices above street-level shops",
+    "transit_radius_m": 400
+  },
+  {
+    "id": "st-boniface",
+    "name": "St. Boniface",
+    "description": "Francophone cultural district across the Red River, home to the French Quarter and emerging innovation corridor.",
+    "persona": "urban-creative",
+    "persona_label": "The Urban Creative",
+    "category": "lifestyle",
+    "lat": 49.8875,
+    "lng": -97.1250,
+    "neighbourhood_names": ["NORTH ST. BONIFACE", "NORTH ST BONIFACE", "CENTRAL ST. BONIFACE", "CENTRAL ST BONIFACE", "DUFRESNE"],
+    "highlights": [
+      "Bilingual community",
+      "French Quarter",
+      "Innovation alley",
+      "River views"
+    ],
+    "office_vibe": "Converted industrial and emerging mixed-use",
+    "transit_radius_m": 500
+  },
+  {
+    "id": "corydon",
+    "name": "Corydon Village",
+    "description": "Little Italy meets modern urban village with Corydon Avenue's dining strip and proximity to residential areas.",
+    "persona": "young-professional",
+    "persona_label": "The Young Professional",
+    "category": "neighborhood",
+    "lat": 49.8710,
+    "lng": -97.1580,
+    "neighbourhood_names": ["CRESCENTWOOD", "RIVER HEIGHTS SOUTH", "SOUTH RIVER HEIGHTS", "RIVERVIEW"],
+    "highlights": [
+      "Corydon Avenue dining strip",
+      "Little Italy",
+      "Established residential area",
+      "Rapid Transit nearby"
+    ],
+    "office_vibe": "Small professional offices along Corydon Ave",
+    "transit_radius_m": 400
+  }
+]

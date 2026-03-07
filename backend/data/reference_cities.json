@@ -1,0 +1,62 @@
+{
+  "toronto": {
+    "display_name": "Toronto, ON",
+    "office_rent_per_sqft": 42.0,
+    "avg_housing_price": 1100000,
+    "avg_monthly_rent_1br": 2500,
+    "avg_commute_minutes": 34,
+    "provincial_tax_rate": 0.1316,
+    "cost_of_living_index": 100,
+    "avg_salary": 95000
+  },
+  "vancouver": {
+    "display_name": "Vancouver, BC",
+    "office_rent_per_sqft": 48.0,
+    "avg_housing_price": 1270000,
+    "avg_monthly_rent_1br": 2800,
+    "avg_commute_minutes": 30,
+    "provincial_tax_rate": 0.1680,
+    "cost_of_living_index": 110,
+    "avg_salary": 92000
+  },
+  "montreal": {
+    "display_name": "Montreal, QC",
+    "office_rent_per_sqft": 28.0,
+    "avg_housing_price": 650000,
+    "avg_monthly_rent_1br": 2100,
+    "avg_commute_minutes": 30,
+    "provincial_tax_rate": 0.2597,
+    "cost_of_living_index": 82,
+    "avg_salary": 82000
+  },
+  "calgary": {
+    "display_name": "Calgary, AB",
+    "office_rent_per_sqft": 20.0,
+    "avg_housing_price": 560000,
+    "avg_monthly_rent_1br": 1650,
+    "avg_commute_minutes": 26,
+    "provincial_tax_rate": 0.15,
+    "cost_of_living_index": 78,
+    "avg_salary": 88000
+  },
+  "ottawa": {
+    "display_name": "Ottawa, ON",
+    "office_rent_per_sqft": 24.0,
+    "avg_housing_price": 665000,
+    "avg_monthly_rent_1br": 2000,
+    "avg_commute_minutes": 27,
+    "provincial_tax_rate": 0.1316,
+    "cost_of_living_index": 85,
+    "avg_salary": 90000
+  },
+  "winnipeg": {
+    "display_name": "Winnipeg, MB",
+    "office_rent_per_sqft": 16.0,
+    "avg_housing_price": 363000,
+    "avg_monthly_rent_1br": 1200,
+    "avg_commute_minutes": 20,
+    "provincial_tax_rate": 0.1740,
+    "cost_of_living_index": 62,
+    "avg_salary": 78000
+  }
+}
