@@ -64,7 +64,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             </AnimatePresence>
 
             {/* Nav items */}
-            <nav className="flex flex-col gap-0.5 px-2 flex-1 pt-4">
+            <nav className={`flex flex-col gap-0.5 flex-1 pt-4 ${collapsed ? "px-1.5 items-center" : "px-2"}`}>
                 {PAGES.map((page, idx) => {
                     const Icon = page.icon;
                     const isActive = pathname === page.href || pathname.startsWith(page.href + "/");
@@ -75,7 +75,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
                             key={page.id}
                             href={page.href}
                             className={[
-                                "group relative flex items-center gap-3 rounded-lg px-2.5 py-2.5 transition-all duration-150 no-underline",
+                                "group relative flex items-center gap-3 rounded px-2.5 py-2.5 transition-all duration-150 no-underline",
                                 isActive
                                     ? "bg-exchange-brick/15 text-frost-white"
                                     : isCompleted

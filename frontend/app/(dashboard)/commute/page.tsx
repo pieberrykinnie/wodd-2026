@@ -1,265 +1,292 @@
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { getCityById } from "@/lib/api";
-import { getNeighborhoods } from "@/lib/api";
-import SectionHeader from "@/components/ui/SectionHeader";
-import MetricTile from "@/components/ui/MetricTile";
-import DataCard from "@/components/ui/DataCard";
-import InsightBanner from "@/components/ui/InsightBanner";
+import { getCityById, getNeighborhoods, type Neighborhood } from "@/lib/api";
 import PersonaTag from "@/components/ui/PersonaTag";
-import { Clock, Car, Bike, ArrowRight } from "lucide-react";
+import { Car, Train, Clock } from "lucide-react";
 
-const CommuteChart = dynamic(
-    () => import("@/components/charts/CommuteChart"),
-    { ssr: false }
-);
-
-type ChartMode = "avg" | "over60" | "hours";
-
-const MODE_LABELS: Record<ChartMode, string> = {
-    avg: "Average Commute",
-    over60: "% Over 60 Minutes",
-    hours: "Annual Hours Lost",
-};
+const PERSONA_ZONE_IDS = ["exchange-district", "river-heights", "tuxedo", "st-vital"];
 
 export default function CommutePage() {
     const { cityId } = useCompanyStore();
     const city = getCityById(cityId) ?? getCityById("toronto")!;
-    const neighborhoods = getNeighborhoods();
-    const [mode, setMode] = useState<ChartMode>("avg");
+    const all = getNeighborhoods();
+    const zones = PERSONA_ZONE_IDS.map((id) => all.find((n) => n.id === id)!).filter(Boolean);
 
     const commuteDelta = city.avgCommute - 20;
     const annualHoursRecovered = Math.round((commuteDelta * 2 * 240) / 60);
 
     return (
-        <div className="p-6 md:p-8 flex flex-col gap-6">
-            <SectionHeader
-                eyebrow="Commute Optimization"
-                title="Time Is the Hidden Benefit"
-                subtitle={`Your employees currently average ${city.avgCommute} minutes each way. In Winnipeg it's 20 minutes. That's ${annualHoursRecovered} hours per person per year.`}
-            />
+        <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="p-6 md:p-8"
+        >
+            {/* Screen label */}
+            <p
+                className="text-[10px] font-semibold uppercase tracking-widest mb-5"
+                style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
+            >
+                Screen 6 — Commute Optimization
+            </p>
 
-            {/* Key metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <MetricTile
-                    label={`${city.name} Avg Commute`}
-                    value={`${city.avgCommute} min`}
-                    accent="blue"
-                />
-                <MetricTile
-                    label="Winnipeg Avg Commute"
-                    value="20 min"
-                    accent="brick"
-                />
-                <MetricTile
-                    label="Time Saved / Day"
-                    value={`${commuteDelta} min`}
-                    delta="each way"
-                    accent="gold"
-                />
-                <MetricTile
-                    label="Hours/Year Recovered"
-                    value={`${annualHoursRecovered} hrs`}
-                    sub="Per employee, both directions"
-                    accent="green"
-                />
-            </div>
+            {/* Full-width two-panel card */}
+            <div
+                className="rounded-xl overflow-hidden"
+                style={{
+                    background: "#FFFFFF",
+                    border: "1px solid #E8EDF2",
+                    boxShadow: "0 4px 24px rgba(15,24,35,0.08)",
+                }}
+            >
+                <div className="flex flex-col lg:flex-row min-h-[520px]">
 
-            {/* Chart + Controls */}
-            <DataCard className="!p-6">
-                <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-                    <p
-                        className="text-sm font-semibold text-frost-white"
-                        style={{ fontFamily: "var(--font-ibm-sans)" }}
-                    >
-                        {MODE_LABELS[mode]}
-                    </p>
-                    <div className="flex gap-1">
-                        {(Object.keys(MODE_LABELS) as ChartMode[]).map((m) => (
-                            <button
-                                key={m}
-                                onClick={() => setMode(m)}
-                                className="px-3 py-1 rounded-full text-xs font-medium transition-all border"
-                                style={{
-                                    fontFamily: "var(--font-ibm-sans)",
-                                    background: mode === m ? "#B23A2B" : "rgba(47,62,79,0.8)",
-                                    color: mode === m ? "#fff" : "#8B98A5",
-                                    borderColor: mode === m ? "#B23A2B" : "rgba(255,255,255,0.08)",
-                                }}
+                    {/* ── LEFT HALF: Bar charts ── */}
+                    <div className="lg:w-1/2 p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-100">
+                        <div>
+                            <p
+                                className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-2"
+                                style={{ fontFamily: "var(--font-ibm-sans)" }}
                             >
-                                {MODE_LABELS[m]}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="h-52">
-                    <CommuteChart mode={mode} />
-                </div>
-            </DataCard>
+                                Commute Optimization
+                            </p>
+                            <h2
+                                className="text-[34px] font-bold text-frost-white leading-tight mb-10"
+                                style={{ fontFamily: "var(--font-display)" }}
+                            >
+                                Time Is the<br />Hidden Benefit
+                            </h2>
 
-            {/* Neighbourhood route cards */}
-            <div>
-                <p
-                    className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-3"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    Neighbourhood Route Times → Downtown Winnipeg
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {neighborhoods.map((n) => (
-                        <RouteCard
-                            key={n.id}
-                            name={n.name}
-                            mins={n.commuteMins}
-                            persona={n.persona}
-                            homePrice={n.avgHomePrice}
-                            transitRoutes={n.transitRoutes}
-                        />
-                    ))}
+                            <div className="space-y-8">
+                                {/* City bar */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="text-2xl leading-none" role="img" aria-label="stressed">😫</span>
+                                            <span
+                                                className="text-[15px] font-semibold text-frost-white"
+                                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                            >
+                                                {city.name}
+                                            </span>
+                                        </div>
+                                        <span
+                                            className="text-[13px] font-semibold"
+                                            style={{ color: "#B23A2B", fontFamily: "var(--font-ibm-mono)" }}
+                                        >
+                                            60–90 min
+                                        </span>
+                                    </div>
+                                    <div className="h-10 rounded-md overflow-hidden" style={{ background: "#F1F4F7" }}>
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: "85%" }}
+                                            transition={{ duration: 1.0, ease: "easeOut", delay: 0.3 }}
+                                            className="h-full rounded-md flex items-center justify-end pr-4"
+                                            style={{ background: "linear-gradient(90deg, #B23A2B 0%, #C4453A 100%)" }}
+                                        >
+                                            <span
+                                                className="text-white text-[11px] font-semibold"
+                                                style={{ fontFamily: "var(--font-ibm-mono)" }}
+                                            >
+                                                {city.avgCommute} min avg
+                                            </span>
+                                        </motion.div>
+                                    </div>
+                                </div>
+
+                                {/* Winnipeg bar */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="text-2xl leading-none" role="img" aria-label="relaxed">😊</span>
+                                            <span
+                                                className="text-[15px] font-semibold text-frost-white"
+                                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                            >
+                                                Winnipeg
+                                            </span>
+                                        </div>
+                                        <span
+                                            className="text-[13px] font-semibold"
+                                            style={{ color: "#5E8C6A", fontFamily: "var(--font-ibm-mono)" }}
+                                        >
+                                            15–25 min
+                                        </span>
+                                    </div>
+                                    <div className="h-10 rounded-md overflow-hidden" style={{ background: "#F1F4F7" }}>
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: "27%" }}
+                                            transition={{ duration: 1.0, ease: "easeOut", delay: 0.5 }}
+                                            className="h-full rounded-md flex items-center justify-end pr-4"
+                                            style={{ background: "linear-gradient(90deg, #5E8C6A 0%, #6EA880 100%)" }}
+                                        >
+                                            <span
+                                                className="text-white text-[11px] font-semibold"
+                                                style={{ fontFamily: "var(--font-ibm-mono)" }}
+                                            >
+                                                20 min avg
+                                            </span>
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hours callout */}
+                        <div
+                            className="mt-8 p-5 rounded-xl flex items-center gap-4"
+                            style={{ background: "#F7F9FB", border: "1px solid #E8EDF2" }}
+                        >
+                            <div
+                                className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
+                                style={{ background: "rgba(185,148,69,0.12)" }}
+                            >
+                                <Clock size={20} style={{ color: "#B99445" }} />
+                            </div>
+                            <div>
+                                <p
+                                    className="text-[26px] font-bold leading-tight"
+                                    style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
+                                >
+                                    {annualHoursRecovered} hrs
+                                    <span
+                                        className="text-[14px] text-concrete-gray font-normal ml-1.5"
+                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                    >
+                                        /year recovered
+                                    </span>
+                                </p>
+                                <p
+                                    className="text-[12px] text-concrete-gray"
+                                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                >
+                                    Per employee — worth $8K–$14K in hidden salary
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── RIGHT HALF: Route cards ── */}
+                    <div
+                        className="flex-1 p-6 lg:p-8 flex flex-col"
+                        style={{ background: "#F7F9FB" }}
+                    >
+                        <p
+                            className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-5"
+                            style={{ fontFamily: "var(--font-ibm-sans)" }}
+                        >
+                            Neighbourhood Routes → Downtown Winnipeg
+                        </p>
+                        <div className="flex flex-col gap-3 flex-1 justify-center">
+                            {zones.map((n) => <RouteCard key={n.id} n={n} />)}
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            {/* Visual commute timeline */}
-            <DataCard>
-                <p
-                    className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    Average Morning vs Winnipeg
-                </p>
-                <CommuteTimeline
-                    cityName={city.name}
-                    cityMins={city.avgCommute}
-                    wpgMins={20}
-                />
-            </DataCard>
-
-            <InsightBanner variant="highlight">
-                At <strong style={{ color: "#C8A44D" }}>20 minutes average commute</strong>, Winnipeg employees have
-                statistically lower stress levels, higher sleep quality, and rate their work-life balance significantly
-                higher than Toronto or Vancouver counterparts. The "hidden salary" of commute time is worth{" "}
-                <strong style={{ color: "#C8A44D" }}>$8,000–$14,000/year</strong> when valued at average hourly rates.
-            </InsightBanner>
-        </div>
+        </motion.div>
     );
 }
 
-function RouteCard({
-    name,
-    mins,
-    persona,
-    homePrice,
-    transitRoutes,
-}: {
-    name: string;
-    mins: number;
-    persona: string;
-    homePrice: number;
-    transitRoutes: string[];
-}) {
-    const barPct = Math.min(100, (mins / 80) * 100);
-
+// ── SVG mini dark map thumbnail ──────────────────────────────────
+function MapThumbnail({ commuteMins }: { commuteMins: number }) {
+    const isShort = commuteMins < 15;
     return (
-        <DataCard hover>
-            <div className="flex items-start justify-between mb-3">
-                <div>
-                    <p className="text-[14px] font-semibold text-frost-white mb-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                        {name}
-                    </p>
-                    <PersonaTag persona={persona} />
-                </div>
-                <div className="text-right">
-                    <p
-                        className="text-2xl font-semibold text-prairie-gold"
-                        style={{ fontFamily: "var(--font-ibm-mono)" }}
+        <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 64 84"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: "block", background: "#1C2A39" }}
+        >
+            {/* Grid lines */}
+            {[14, 28, 42, 56, 70].map((y) => (
+                <line key={`h${y}`} x1="0" y1={y} x2="64" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            ))}
+            {[16, 32, 48].map((x) => (
+                <line key={`v${x}`} x1={x} y1="0" x2={x} y2="84" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            ))}
+            {/* Dashed route */}
+            <line
+                x1="18" y1="68"
+                x2="46" y2="16"
+                stroke={isShort ? "#5E8C6A" : "#B99445"}
+                strokeWidth="1.5"
+                strokeDasharray="3 2.5"
+                opacity="0.75"
+            />
+            {/* Downtown dot (destination) */}
+            <circle cx="46" cy="16" r="4.5" fill="#1C2A39" stroke="#5E8C6A" strokeWidth="1.5" />
+            <circle cx="46" cy="16" r="2" fill="#5E8C6A" />
+            {/* Neighbourhood dot (origin) */}
+            <circle cx="18" cy="68" r="4.5" fill="#B99445" opacity="0.9" />
+            <circle cx="18" cy="68" r="8" stroke="#B99445" strokeWidth="0.75" opacity="0.2" />
+        </svg>
+    );
+}
+
+// ── Route card ───────────────────────────────────────────────────
+function RouteCard({ n }: { n: Neighborhood }) {
+    return (
+        <div
+            className="rounded-lg overflow-hidden flex"
+            style={{
+                background: "#FFFFFF",
+                border: "1px solid #E8EDF2",
+                boxShadow: "0 1px 6px rgba(15,24,35,0.05)",
+                minHeight: 88,
+            }}
+        >
+            {/* Map thumbnail */}
+            <div className="w-16 flex-shrink-0">
+                <MapThumbnail commuteMins={n.commuteMins} />
+            </div>
+            <div className="w-px bg-gray-100 flex-shrink-0" />
+
+            {/* Content */}
+            <div className="flex-1 px-4 py-3 flex flex-col justify-center gap-2">
+                <p
+                    className="text-[13px] font-semibold text-frost-white"
+                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                >
+                    {n.name}
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <PersonaTag persona={n.persona} />
+                    {/* Drive time chip */}
+                    <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
+                        style={{
+                            background: "rgba(47,62,79,0.08)",
+                            color: "#2F3E4F",
+                            fontFamily: "var(--font-ibm-mono)",
+                        }}
                     >
-                        {mins}
-                    </p>
-                    <p className="text-[11px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                        min
-                    </p>
-                </div>
-            </div>
-
-            {/* Bar */}
-            <div className="h-1.5 bg-river-slate-l rounded-full mb-3 overflow-hidden">
-                <div
-                    className="h-full rounded-full transition-all duration-300"
-                    style={{ width: `${barPct}%`, background: "#B23A2B" }}
-                />
-            </div>
-
-            <div className="flex items-center justify-between text-[12px] text-concrete-gray">
-                <span style={{ fontFamily: "var(--font-ibm-mono)" }}>
-                    ${(homePrice / 1000).toFixed(0)}K avg home
-                </span>
-                <div className="flex gap-1">
-                    {transitRoutes.slice(0, 2).map((r) => (
+                        <Car size={9} />
+                        {n.commuteMins} min
+                    </span>
+                    {/* Transit chip */}
+                    {n.transitRoutes.slice(0, 1).map((r) => (
                         <span
                             key={r}
-                            className="px-1.5 py-0.5 rounded bg-river-slate text-concrete-gray text-[10px]"
-                            style={{ fontFamily: "var(--font-ibm-mono)" }}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
+                            style={{
+                                background: "rgba(94,140,106,0.12)",
+                                color: "#5E8C6A",
+                                fontFamily: "var(--font-ibm-mono)",
+                            }}
                         >
-                            {r}
+                            <Train size={9} />
+                            Route {r}
                         </span>
                     ))}
                 </div>
             </div>
-        </DataCard>
-    );
-}
-
-function CommuteTimeline({
-    cityName,
-    cityMins,
-    wpgMins,
-}: {
-    cityName: string;
-    cityMins: number;
-    wpgMins: number;
-}) {
-    const max = Math.max(cityMins, 90);
-
-    return (
-        <div className="space-y-4">
-            <div>
-                <div className="flex justify-between mb-1.5">
-                    <p className="text-[12px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                        {cityName}
-                    </p>
-                    <p className="text-[12px] font-semibold text-concrete-gray" style={{ fontFamily: "var(--font-ibm-mono)" }}>
-                        {cityMins} min
-                    </p>
-                </div>
-                <div className="h-3 bg-river-slate/80 rounded-full overflow-hidden">
-                    <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${(cityMins / max) * 100}%`, background: "#8B98A5" }}
-                    />
-                </div>
-            </div>
-            <div>
-                <div className="flex justify-between mb-1.5">
-                    <p className="text-[12px] text-exchange-brick font-semibold" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                        Winnipeg
-                    </p>
-                    <p className="text-[12px] font-semibold text-exchange-brick" style={{ fontFamily: "var(--font-ibm-mono)" }}>
-                        {wpgMins} min
-                    </p>
-                </div>
-                <div className="h-3 bg-river-slate/80 rounded-full overflow-hidden">
-                    <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${(wpgMins / max) * 100}%`, background: "#B23A2B" }}
-                    />
-                </div>
-            </div>
-            <p className="text-[12px] text-concrete-gray/70 mt-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                ↑ Both bars show average one-way commute time
-            </p>
         </div>
     );
 }

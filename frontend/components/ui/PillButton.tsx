@@ -24,11 +24,11 @@ export default function PillButton({
     type = "button",
 }: PillButtonProps) {
     const base =
-        "inline-flex items-center gap-2 rounded-full font-semibold text-sm px-6 py-3 transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-exchange-brick focus-visible:ring-offset-2 focus-visible:ring-offset-prairie-blue disabled:opacity-40 disabled:cursor-not-allowed";
+        "inline-flex items-center gap-2 rounded font-semibold text-sm px-6 py-3 transition-all duration-200 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-exchange-brick focus-visible:ring-offset-2 focus-visible:ring-offset-prairie-blue disabled:opacity-40 disabled:cursor-not-allowed";
 
     const variants = {
         primary:
-            "bg-exchange-brick text-white hover:bg-[#c9432f] active:scale-[0.97] shadow-lg shadow-exchange-brick/20",
+            "bg-exchange-brick text-white hover:bg-[#A07A2F] active:scale-[0.97] shadow-lg shadow-exchange-brick/20",
         secondary:
             "bg-river-slate text-frost-white border border-river-slate-l hover:bg-river-slate-l active:scale-[0.97]",
         ghost:

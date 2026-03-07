@@ -34,7 +34,8 @@ def compute_comparison(
     sqft_per_employee: float = 150.0,
 ) -> CostComparisonResponse:
     ref = _load_reference_data()
-    current = ref[company.current_city]
+    city_key = company.current_city.lower()
+    current = ref.get(city_key) or ref["toronto"]
     wpg = ref["winnipeg"]
 
     total_sqft = company.employee_count * sqft_per_employee
@@ -56,10 +57,12 @@ def compute_comparison(
 
     total_savings = office_savings + salary_adjustment
 
+    resolved_key = city_key if city_key in ref else "toronto"
+
     return CostComparisonResponse(
         company_name=company.company_name,
         employee_count=company.employee_count,
-        current_city=CityMetrics(city_key=company.current_city, **current),
+        current_city=CityMetrics(city_key=resolved_key, **current),
         winnipeg=CityMetrics(city_key="winnipeg", **wpg),
         savings=SavingsBreakdown(
             annual_office_rent_savings=round(office_savings, 2),

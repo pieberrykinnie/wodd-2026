@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { Building2, ChevronRight, Menu } from "lucide-react";
+import { ChevronRight, Menu } from "lucide-react";
 
 interface TopNavProps {
     onMenuToggle: () => void;
@@ -32,7 +33,7 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
             {/* Menu toggle */}
             <button
                 onClick={onMenuToggle}
-                className="p-2 rounded-lg hover:bg-river-slate transition-colors text-concrete-gray hover:text-frost-white"
+                className="p-2 rounded hover:bg-river-slate transition-colors text-concrete-gray hover:text-frost-white"
                 aria-label="Toggle sidebar"
             >
                 <Menu size={18} />
@@ -43,9 +44,13 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
                 href="/onboarding"
                 className="flex items-center gap-2.5 no-underline"
             >
-                <div className="w-7 h-7 rounded-md bg-exchange-brick flex items-center justify-center">
-                    <Building2 size={14} className="text-white" />
-                </div>
+                <Image
+                    src="/logo-transparent-bg.png"
+                    alt="Winnipeg Relocation Intelligence"
+                    width={32}
+                    height={32}
+                    className="rounded-md"
+                />
                 <span
                     className="text-frost-white font-semibold text-sm tracking-wide hidden sm:block"
                     style={{ fontFamily: "var(--font-ibm-sans)" }}
@@ -79,10 +84,10 @@ export default function TopNav({ onMenuToggle }: TopNavProps) {
             {/* Right spacer / badge */}
             <div className="ml-auto flex items-center gap-3">
                 <div
-                    className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-exchange-brick/30 text-xs"
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded border border-exchange-brick/30 text-xs"
                     style={{ fontFamily: "var(--font-ibm-mono)" }}
                 >
-                    <span className="w-1.5 h-1.5 rounded-full bg-exchange-brick animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded bg-exchange-brick animate-pulse" />
                     <span className="text-exchange-brick font-medium">LIVE ANALYSIS</span>
                 </div>
             </div>

@@ -18,10 +18,10 @@ export default function DataCard({
     return (
         <div
             className={[
-                "bg-river-slate rounded-xl border border-white/5 relative overflow-hidden",
+                "bg-river-slate rounded border border-black/5 relative overflow-hidden",
                 paddings[padding],
                 hover
-                    ? "transition-all duration-200 hover:border-cool-blue/30 hover:shadow-lg hover:shadow-black/20 cursor-pointer"
+                    ? "transition-all duration-200 hover:border-cool-blue/40 hover:shadow-md hover:shadow-black/10 cursor-pointer"
                     : "",
                 className,
             ].join(" ")}

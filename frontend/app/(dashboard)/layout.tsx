@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import TopNav from "@/components/layout/TopNav";
 import Sidebar from "@/components/layout/Sidebar";
@@ -13,7 +14,7 @@ const pageVariants = {
 
 const pageTransition = {
     type: "tween" as const,
-    ease: "easeInOut",
+    ease: "easeInOut" as const,
     duration: 0.25,
 };
 
@@ -22,20 +23,21 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const pathname = usePathname();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+    const sidebarWidth = sidebarCollapsed ? 56 : 224;
 
     return (
-        <div className="min-h-screen bg-prairie-blue grain">
-            <TopNav onMenuToggle={() => setSidebarCollapsed((v) => !v)} />
+        <div className="min-h-screen bg-prairie-blue">
+            <TopNav onMenuToggle={() => setSidebarCollapsed((c) => !c)} />
             <Sidebar collapsed={sidebarCollapsed} />
-
-            {/* Main content, offset by sidebar width */}
             <main
                 className="pt-16 min-h-screen transition-all duration-300 ease-in-out"
-                style={{ marginLeft: sidebarCollapsed ? "56px" : "224px" }}
+                style={{ paddingLeft: sidebarWidth }}
             >
                 <motion.div
-                    key={typeof window !== "undefined" ? window.location.pathname : "page"}
+                    key={pathname}
                     initial="initial"
                     animate="in"
                     exit="out"

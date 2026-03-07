@@ -17,7 +17,7 @@ const COMMUTE_DATA = {
     avgMins: [75, 62, 52, 20],
     pctOver60: [52, 38, 29, 4],
     annualHoursLost: [250, 207, 173, 67],
-    colors: ["#8B98A5", "#4C6E91", "#5E8C6A", "#B23A2B"],
+    colors: ["#0D3A68", "#1D507A", "#49575E", "#4C6E91"],
 };
 
 type ChartMode = "avg" | "over60" | "hours";
@@ -65,9 +65,9 @@ export default function CommuteChart({ mode = "avg" }: CommuteChartProps) {
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "#2F3E4F",
-                titleColor: "#F2F5F7",
-                bodyColor: "#C8A44D",
+                backgroundColor: "#FFFFFF",
+                titleColor: "#0F1823",
+                bodyColor: "#4C6E91",
                 padding: 10,
                 callbacks: {
                     label: (ctx: { parsed: { y: number } }) => ` ${config.format(ctx.parsed.y)}`,
@@ -76,21 +76,21 @@ export default function CommuteChart({ mode = "avg" }: CommuteChartProps) {
         },
         scales: {
             x: {
-                grid: { color: "rgba(255,255,255,0.04)" },
+                grid: { color: "rgba(0,0,0,0.06)" },
                 ticks: {
-                    color: "#8B98A5",
+                    color: "#64748B",
                     font: { family: "'IBM Plex Sans', sans-serif", size: 12 },
                 },
-                border: { color: "rgba(255,255,255,0.04)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
             y: {
-                grid: { color: "rgba(255,255,255,0.06)" },
+                grid: { color: "rgba(0,0,0,0.06)" },
                 ticks: {
-                    color: "#8B98A5",
+                    color: "#64748B",
                     font: { family: "'IBM Plex Mono', monospace", size: 11 },
                     callback: (v: number | string) => config.format(Number(v)),
                 },
-                border: { color: "rgba(255,255,255,0.04)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
         },
     };

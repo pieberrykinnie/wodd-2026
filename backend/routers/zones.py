@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from models.responses import ZoneDetail, ZonesListResponse
-from services.zones import get_all_zones, get_zone_detail
+from models.responses import HeatmapDataResponse, ZoneDetail, ZonesListResponse
+from services.zones import get_all_zones, get_heatmap_data, get_zone_detail
 
 router = APIRouter()
 
@@ -11,6 +11,12 @@ async def list_zones():
     """Return all curated zones enriched with live Socrata data."""
     zones = await get_all_zones()
     return ZonesListResponse(zones=zones)
+
+
+@router.get("/heatmap", response_model=HeatmapDataResponse)
+async def heatmap_data():
+    """Return per-neighbourhood density points for the heatmap layer."""
+    return await get_heatmap_data()
 
 
 @router.get("/{zone_id}", response_model=ZoneDetail)

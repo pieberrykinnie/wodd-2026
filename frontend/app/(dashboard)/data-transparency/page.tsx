@@ -22,7 +22,7 @@ const SOURCES = [
     {
         id: "cbre-office",
         icon: Building2,
-        color: "#B23A2B",
+        color: "#4C6E91",
         title: "CBRE Canada — Office Market Reports",
         description: "Commercial office rent per sqft, vacancy rates, and absorption data.",
         table: "Q4 2024 Canada Office Report",
@@ -33,7 +33,7 @@ const SOURCES = [
     {
         id: "crea-home",
         icon: MapPin,
-        color: "#C8A44D",
+        color: "#4C6E91",
         title: "CREA — Canadian Real Estate Association",
         description: "Average residential sale prices by city and Metropolitan Statistical Area.",
         table: "CREA National Stats",
@@ -55,7 +55,7 @@ const SOURCES = [
     {
         id: "env-canada-sunshine",
         icon: Globe,
-        color: "#D89C3D",
+        color: "#4C6E91",
         title: "Environment & Climate Change Canada",
         description: "30-year sunshine hours averages and climate normals for Canadian cities.",
         table: "Canadian Climate Normals 1991–2020",
@@ -66,7 +66,7 @@ const SOURCES = [
     {
         id: "edw-winnipeg",
         icon: Building2,
-        color: "#B23A2B",
+        color: "#4C6E91",
         title: "Economic Development Winnipeg",
         description: "Neighbourhood profiles, business incentives, and local economic data.",
         table: "2024 Economic Indicators",
@@ -192,7 +192,7 @@ export default function DataTransparencyPage() {
                         <DataCard key={source.id} hover>
                             <div className="flex items-start gap-3">
                                 <div
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                    className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0"
                                     style={{ background: source.color + "20" }}
                                 >
                                     <Icon size={18} style={{ color: source.color }} />
@@ -217,7 +217,7 @@ export default function DataTransparencyPage() {
                                         {source.metrics.map((m) => (
                                             <span
                                                 key={m}
-                                                className="text-[10px] px-2 py-0.5 rounded-full border"
+                                                className="text-[10px] px-2 py-0.5 rounded border"
                                                 style={{
                                                     fontFamily: "var(--font-ibm-sans)",
                                                     color: source.color,
@@ -270,33 +270,88 @@ export default function DataTransparencyPage() {
                 </div>
             </div>
 
-            {/* Footer banner */}
+            {/* Screen 9 — Data Transparency Footer */}
             <div
-                className="rounded-xl p-6 border text-center"
-                style={{
-                    background: "rgba(178,58,43,0.06)",
-                    borderColor: "rgba(178,58,43,0.2)",
-                }}
+                className="-mx-6 md:-mx-8 -mb-4"
+                style={{ background: "#1C2A39" }}
             >
-                <p
-                    className="text-[11px] font-semibold uppercase tracking-widest text-exchange-brick mb-3"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    Powered by Open Data
-                </p>
-                <p
-                    className="text-xl font-bold text-frost-white mb-2"
-                    style={{ fontFamily: "var(--font-display)" }}
-                >
-                    The case for Winnipeg doesn&apos;t need embellishment.
-                </p>
-                <p
-                    className="text-[14px] text-concrete-gray max-w-lg mx-auto"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    Every figure cited in this platform is available to the public, free of charge, from Statistics Canada,
-                    CREA, CBRE, and Environment Canada. We just put it in the same room as the decision-maker.
-                </p>
+                <div className="px-6 md:px-8 py-10 flex flex-col md:flex-row md:items-end gap-8">
+                    {/* Left: heading + badges + tagline */}
+                    <div className="flex-1">
+                        <p
+                            className="text-[10px] font-semibold uppercase tracking-widest mb-3"
+                            style={{ color: "rgba(185,148,69,0.55)", fontFamily: "var(--font-ibm-mono)" }}
+                        >
+                            Screen 9 — Data Transparency
+                        </p>
+                        <h2
+                            className="font-bold text-white mb-6 leading-tight"
+                            style={{ fontFamily: "var(--font-display)", fontSize: 28 }}
+                        >
+                            Powered by Open Data
+                        </h2>
+
+                        {/* 5 source pill badges */}
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {[
+                                "Winnipeg Open Data",
+                                "Statistics Canada",
+                                "Manitoba Hydro",
+                                "GTFS Transit",
+                                "MLS Listings",
+                            ].map((src) => (
+                                <span
+                                    key={src}
+                                    className="px-3 py-1.5 rounded-full text-[12px] font-semibold"
+                                    style={{
+                                        background: "rgba(255,255,255,0.07)",
+                                        color: "#C8A44D",
+                                        border: "1px solid rgba(200,164,77,0.25)",
+                                        fontFamily: "var(--font-ibm-sans)",
+                                        letterSpacing: "0.01em",
+                                    }}
+                                >
+                                    {src}
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* Tagline */}
+                        <p
+                            className="text-[16px] italic"
+                            style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
+                        >
+                            Every figure is sourced. Every recommendation is defensible.
+                        </p>
+                    </div>
+
+                    {/* Right: WRI logo lockup */}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <div
+                            className="px-4 py-2 rounded"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                        >
+                            <p
+                                className="text-[18px] font-bold leading-none tracking-tight"
+                                style={{ color: "#C8A44D", fontFamily: "var(--font-display)" }}
+                            >
+                                WRI
+                            </p>
+                            <p
+                                className="text-[9px] uppercase tracking-widest mt-0.5"
+                                style={{ color: "rgba(200,164,77,0.55)", fontFamily: "var(--font-ibm-mono)" }}
+                            >
+                                Winnipeg Relocation Intelligence
+                            </p>
+                        </div>
+                        <p
+                            className="text-[10px]"
+                            style={{ color: "rgba(139,152,165,0.45)", fontFamily: "var(--font-ibm-mono)" }}
+                        >
+                            wodd-2026 · open data
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );

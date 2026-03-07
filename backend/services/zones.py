@@ -3,6 +3,9 @@ from pathlib import Path
 
 from models.responses import (
     BusinessInfo,
+    HeatmapDataResponse,
+    HeatmapPoint,
+    SignalMax,
     TransitStopInfo,
     ZoneDetail,
     ZoneSummary,
@@ -11,6 +14,19 @@ from services import socrata, transit
 
 _ZONE_DEFS: list[dict] | None = None
 _DATA_PATH = Path(__file__).parent.parent / "data" / "zones.json"
+_COORDS_PATH = Path(__file__).parent.parent / "data" / "neighbourhood_coords.json"
+
+_NEIGHBOURHOOD_COORDS: dict[str, tuple[float, float]] | None = None
+
+
+def _load_neighbourhood_coords() -> dict[str, tuple[float, float]]:
+    global _NEIGHBOURHOOD_COORDS
+    if _NEIGHBOURHOOD_COORDS is None:
+        raw: list[dict] = json.loads(_COORDS_PATH.read_text())
+        _NEIGHBOURHOOD_COORDS = {
+            entry["name"].upper(): (entry["lat"], entry["lng"]) for entry in raw
+        }
+    return _NEIGHBOURHOOD_COORDS
 
 
 def _load_zone_defs() -> list[dict]:
@@ -118,10 +134,12 @@ async def get_all_zones() -> list[ZoneSummary]:
                 description=z["description"],
                 persona=z["persona"],
                 persona_label=z["persona_label"],
+                category=z.get("category", "office"),
                 lat=z["lat"],
                 lng=z["lng"],
                 highlights=z["highlights"],
                 office_vibe=z["office_vibe"],
+                neighbourhood_names=names,
                 avg_property_value=_lookup_avg(
                     property_avgs, "neighbourhood_area", "avg_val", names
                 ),
@@ -245,6 +263,7 @@ async def get_zone_detail(zone_id: str) -> ZoneDetail | None:
         description=zone_def["description"],
         persona=zone_def["persona"],
         persona_label=zone_def["persona_label"],
+        category=zone_def.get("category", "office"),
         lat=zone_def["lat"],
         lng=zone_def["lng"],
         highlights=zone_def["highlights"],
@@ -264,3 +283,103 @@ async def get_zone_detail(zone_id: str) -> ZoneDetail | None:
         nearby_transit_stops=nearby_stops,
         avg_year_built=avg_year,
     )
+
+
+def _normalise(values: list[float]) -> list[float]:
+    """Min-max normalise a list of floats to [0, 1]."""
+    if not values:
+        return values
+    lo, hi = min(values), max(values)
+    if hi == lo:
+        return [0.5] * len(values)
+    return [(v - lo) / (hi - lo) for v in values]
+
+
+async def get_heatmap_data() -> HeatmapDataResponse:
+    """
+    Return per-neighbourhood density points for the heatmap layer.
+    Each point carries normalised signals (business activity, property value,
+    construction activity) and a composite weight.
+    """
+    coords = _load_neighbourhood_coords()
+
+    # Fetch all three Socrata datasets in parallel
+    try:
+        biz_counts = await _fetch_business_counts()
+    except Exception:
+        biz_counts = []
+    try:
+        property_avgs = await _fetch_property_averages()
+    except Exception:
+        property_avgs = []
+    try:
+        permit_values = await _fetch_permit_values()
+    except Exception:
+        permit_values = []
+
+    # Build name-keyed lookup dicts
+    biz_lookup: dict[str, float] = {}
+    for row in biz_counts:
+        key = row.get("neighbourhood_name", "").upper()
+        try:
+            biz_lookup[key] = float(row["cnt"])
+        except (ValueError, TypeError, KeyError):
+            pass
+
+    prop_lookup: dict[str, float] = {}
+    for row in property_avgs:
+        key = row.get("neighbourhood_area", "").upper()
+        try:
+            prop_lookup[key] = float(row["avg_val"])
+        except (ValueError, TypeError, KeyError):
+            pass
+
+    permit_lookup: dict[str, float] = {}
+    for row in permit_values:
+        key = row.get("neighbourhood", "").upper()
+        try:
+            permit_lookup[key] = float(row["total_val"])
+        except (ValueError, TypeError, KeyError):
+            pass
+
+    # Only include neighbourhoods we have coordinates for
+    names = list(coords.keys())
+
+    raw_biz = [biz_lookup.get(n, 0.0) for n in names]
+    raw_prop = [prop_lookup.get(n, 0.0) for n in names]
+    raw_permit = [permit_lookup.get(n, 0.0) for n in names]
+
+    norm_biz = _normalise(raw_biz)
+    norm_prop = _normalise(raw_prop)
+    norm_permit = _normalise(raw_permit)
+
+    signal_max = SignalMax(
+        business=max(raw_biz) if raw_biz else 0.0,
+        property=max(raw_prop) if raw_prop else 0.0,
+        permit=max(raw_permit) if raw_permit else 0.0,
+    )
+
+    points: list[HeatmapPoint] = []
+    for i, name in enumerate(names):
+        lat, lng = coords[name]
+        nb = norm_biz[i]
+        np_ = norm_prop[i]
+        npermit = norm_permit[i]
+        # Skip neighbourhoods with no data at all
+        if nb == 0.0 and np_ == 0.0 and npermit == 0.0:
+            continue
+        # Weighted composite: business 40%, property 35%, permits 25%
+        weight = round(0.40 * nb + 0.35 * np_ + 0.25 * npermit, 4)
+        points.append(
+            HeatmapPoint(
+                lat=lat,
+                lng=lng,
+                name=name.title(),
+                weight=weight,
+                business_count=round(nb, 4),
+                property_value=round(np_, 4),
+                permit_value=round(npermit, 4),
+            )
+        )
+
+    return HeatmapDataResponse(points=points, signal_max=signal_max)

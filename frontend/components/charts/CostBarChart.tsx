@@ -18,10 +18,10 @@ interface CostBarChartProps {
 }
 
 const CITY_COLORS: Record<string, string> = {
-    toronto: "#8B98A5",
-    vancouver: "#4C6E91",
-    montreal: "#5E8C6A",
-    winnipeg: "#B23A2B",
+    toronto: "#0D3A68",
+    vancouver: "#1D507A",
+    montreal: "#49575E",
+    winnipeg: "#4C6E91",
 };
 
 const METRICS: Record<
@@ -88,11 +88,11 @@ export default function CostBarChart({
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "#2F3E4F",
-                titleColor: "#F2F5F7",
-                bodyColor: "#C8A44D",
+                backgroundColor: "#FFFFFF",
+                titleColor: "#0F1823",
+                bodyColor: "#4C6E91",
                 padding: 10,
-                borderColor: "rgba(255,255,255,0.1)",
+                borderColor: "rgba(0,0,0,0.12)",
                 borderWidth: 1,
                 callbacks: {
                     label: (ctx: { parsed: { y: number } }) => ` ${m.format(ctx.parsed.y)}`,
@@ -101,21 +101,21 @@ export default function CostBarChart({
         },
         scales: {
             x: {
-                grid: { color: "rgba(255,255,255,0.04)" },
+                grid: { color: "rgba(0,0,0,0.06)" },
                 ticks: {
-                    color: "#8B98A5",
+                    color: "#64748B",
                     font: { family: "'IBM Plex Sans', sans-serif", size: 12 },
                 },
-                border: { color: "rgba(255,255,255,0.04)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
             y: {
-                grid: { color: "rgba(255,255,255,0.06)" },
+                grid: { color: "rgba(0,0,0,0.06)" },
                 ticks: {
-                    color: "#8B98A5",
+                    color: "#64748B",
                     font: { family: "'IBM Plex Mono', monospace", size: 11 },
                     callback: (v: number | string) => m.format(Number(v)),
                 },
-                border: { color: "rgba(255,255,255,0.04)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
         },
     };

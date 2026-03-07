@@ -28,7 +28,7 @@ export default function SavingsChart({
         datasets: [
             {
                 data: [officeSavings, disposableIncrease, housingEquity],
-                backgroundColor: ["#B23A2B", "#C8A44D", "#5E8C6A"],
+                backgroundColor: ["#B99445", "#1D507A", "#49575E"],
                 borderRadius: 8,
                 borderSkipped: false,
             },
@@ -42,9 +42,9 @@ export default function SavingsChart({
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "#2F3E4F",
-                titleColor: "#F2F5F7",
-                bodyColor: "#C8A44D",
+                backgroundColor: "#FFFFFF",
+                titleColor: "#0F1823",
+                bodyColor: "#4C6E91",
                 padding: 12,
                 callbacks: {
                     label: (ctx: { parsed: { x: number } }) =>
@@ -54,21 +54,21 @@ export default function SavingsChart({
         },
         scales: {
             x: {
-                grid: { color: "rgba(255,255,255,0.05)" },
+                grid: { color: "rgba(0,0,0,0.06)" },
                 ticks: {
-                    color: "#8B98A5",
+                    color: "#64748B",
                     font: { family: "'IBM Plex Mono', monospace", size: 11 },
                     callback: (v: number | string) => formatCurrency(Number(v), true),
                 },
-                border: { color: "rgba(255,255,255,0.05)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
             y: {
                 grid: { display: false },
                 ticks: {
-                    color: "#F2F5F7",
+                    color: "#0F1823",
                     font: { family: "'IBM Plex Sans', sans-serif", size: 12 },
                 },
-                border: { color: "rgba(255,255,255,0.05)" },
+                border: { color: "rgba(0,0,0,0.06)" },
             },
         },
     };

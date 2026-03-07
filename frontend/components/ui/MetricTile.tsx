@@ -1,6 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import SourceTooltip from "@/components/ui/SourceTooltip";
+
+interface SourceInfo {
+    label: string;
+    url?: string;
+    year?: string;
+    table?: string;
+}
 
 interface MetricTileProps {
     label: string;
@@ -10,13 +18,14 @@ interface MetricTileProps {
     sub?: string;
     accent?: "gold" | "brick" | "green" | "blue";
     large?: boolean;
+    source?: SourceInfo;
 }
 
 const accentColors = {
-    gold: "#C8A44D",
-    brick: "#B23A2B",
-    green: "#5E8C6A",
-    blue: "#4C6E91",
+    gold: "#4C6E91",
+    brick: "#4C6E91",
+    green: "#49575E",
+    blue: "#1D507A",
 };
 
 export default function MetricTile({
@@ -27,6 +36,7 @@ export default function MetricTile({
     sub,
     accent = "gold",
     large = false,
+    source,
 }: MetricTileProps) {
     const color = accentColors[accent];
 
@@ -35,19 +45,27 @@ export default function MetricTile({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="bg-river-slate rounded-xl p-5 border border-white/5 relative overflow-hidden grain"
+            className="bg-river-slate rounded p-5 border border-black/5 relative overflow-hidden"
         >
             {/* Accent line */}
             <div
-                className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl"
+                className="absolute top-0 left-0 right-0 h-0.5 rounded-t-sm"
                 style={{ background: color }}
             />
 
             <p
-                className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-3"
+                className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-3 flex items-center"
                 style={{ fontFamily: "var(--font-ibm-sans)" }}
             >
                 {label}
+                {source && (
+                    <SourceTooltip
+                        source={source.label}
+                        url={source.url}
+                        year={source.year}
+                        table={source.table}
+                    />
+                )}
             </p>
 
             <p
@@ -65,13 +83,13 @@ export default function MetricTile({
 
             {delta && (
                 <span
-                    className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full"
+                    className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded"
                     style={{
                         fontFamily: "var(--font-ibm-mono)",
-                        color: deltaPositive ? "#5E8C6A" : "#B23A2B",
+                        color: deltaPositive ? "#4C6E91" : "#49575E",
                         background: deltaPositive
-                            ? "rgba(94,140,106,0.12)"
-                            : "rgba(178,58,43,0.12)",
+                            ? "rgba(185,148,69,0.12)"
+                            : "rgba(73,87,94,0.12)",
                     }}
                 >
                     {delta}
