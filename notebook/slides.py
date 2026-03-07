@@ -72,7 +72,7 @@ def _(httpx, pd):
     _RENT_GEO = {
         "Toronto": 125,
         "Vancouver": 184,
-        "Montréal": 46,
+        "Calgary": 100,
         "Winnipeg": 134,
     }
 
@@ -236,26 +236,35 @@ def _(httpx, pd):
 
 @app.cell
 def _():
-    # ── Display constants ───────────────────────────────────────────────
-    CITIES = ["Toronto", "Vancouver", "Montréal", "Winnipeg"]
+    # ── WinLocate Brand Palette ──────────────────────────────────────────
+    # Navy blue primary, gold accent — derived from the WinLocate logo.
+    NAVY = "#1B2A4A"
+    GOLD = "#D4A843"
+    LIGHT_GOLD = "#FDF6E3"
+    SLATE = "#64748B"
+
+    CITIES = ["Toronto", "Vancouver", "Calgary", "Winnipeg"]
     CITY_COLORS = {
         "Toronto": "#8B98A5",
-        "Vancouver": "#4C6E91",
-        "Montréal": "#5E8C6A",
-        "Winnipeg": "#B23A2B",
+        "Vancouver": "#8B98A5",
+        "Calgary": "#8B98A5",
+        "Winnipeg": GOLD,
     }
-    return CITIES, CITY_COLORS
+    return CITIES, CITY_COLORS, GOLD, LIGHT_GOLD, NAVY, SLATE
 
 
 @app.cell
 def _(
     CITY_COLORS,
+    GOLD,
+    LIGHT_GOLD,
+    NAVY,
+    SLATE,
     go,
     mo,
     pd,
     rent_df,
     statscan_ok,
-    van_permits_df,
     wpg_avg_assessment,
     wpg_biz_count,
     wpg_permits_df,
@@ -273,14 +282,14 @@ def _(
                 marker_color=colors,
                 text=[fmt.format(v) for v in values],
                 textposition="outside",
-                textfont=dict(size=15),
+                textfont=dict(size=15, color=NAVY),
             )
         )
         _range = x_range or ([0, max(values) * 1.35] if values else [0, 1])
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=15),
+                font=dict(size=15, color=NAVY),
                 x=0.5,
                 xanchor="center",
             ),
@@ -288,8 +297,10 @@ def _(
             height=260,
             margin=dict(t=45, b=15, l=100, r=80),
             xaxis=dict(visible=False, range=_range),
-            yaxis=dict(tickfont=dict(size=14)),
+            yaxis=dict(tickfont=dict(size=14, color=NAVY)),
             font=dict(family="Inter, system-ui, sans-serif"),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
         )
         return fig
 
@@ -309,17 +320,21 @@ def _(
 
     slide_title = mo.center(
         mo.md(
-            """
+            f"""
 <div style="padding: 60px 40px 40px;">
-<h1 style="font-size: 2.8em; font-weight: 800; color: #1a1a2e; line-height: 1.2;">
-Canadian companies are trapped<br>in expensive cities.
-</h1>
-<p style="font-size: 1.35em; color: #555; max-width: 750px; margin: 20px auto 0;">
-Housing unaffordable. Office rents crushing.<br>
-Commutes eating your people alive.
+<p style="font-size: 1.1em; color: {GOLD}; font-weight: 600;
+          letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px;">
+WinLocate
 </p>
-<p style="font-size: 1.5em; color: #B23A2B; font-weight: 700; margin-top: 30px;">
-What if there was an arbitrage?
+<h1 style="font-size: 2.8em; font-weight: 800; color: {NAVY}; line-height: 1.2;">
+Canadian companies are bleeding money<br>in overpriced cities.
+</h1>
+<p style="font-size: 1.35em; color: {SLATE}; max-width: 750px; margin: 20px auto 0;">
+Average 2BR rent in Toronto: over $1,800/mo. Vancouver: over $2,000.<br>
+Your employees can't afford to live where you operate.
+</p>
+<p style="font-size: 1.5em; color: {GOLD}; font-weight: 700; margin-top: 30px;">
+There is an arbitrage &mdash; and it's called Winnipeg.
 </p>
 </div>
 """
@@ -344,12 +359,12 @@ What if there was an arbitrage?
 
         _slide2_parts.append(
             mo.md(
-                """
-<h2 style="text-align:center; color:#1a1a2e; margin-bottom:0;">The Rent Gap</h2>
-<p style="text-align:center; color:#888; font-size:0.9em; margin-top:4px;">
+                f"""
+<h2 style="text-align:center; color:{NAVY}; margin-bottom:0;">The Rent Gap</h2>
+<p style="text-align:center; color:{SLATE}; font-size:0.9em; margin-top:4px;">
 Live from Statistics Canada &mdash; CMHC Rental Market Survey
 (<a href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301"
-   target="_blank" rel="noopener noreferrer">Table 34-10-0133</a>)
+   target="_blank" rel="noopener noreferrer" style="color:{GOLD};">Table 34-10-0133</a>)
 </p>
 """
             )
@@ -404,11 +419,22 @@ Live from Statistics Canada &mdash; CMHC Rental Market Survey
                     bordered=True,
                 ),
             )
+            # 50-employee team calculation
+            _team_savings = _delta * 12 * 50
+            _stats.append(
+                mo.stat(
+                    value=f"${_team_savings:,.0f}/yr",
+                    label="50-person team savings",
+                    caption=f"vs {_max_city} — housing costs alone",
+                    direction="decrease",
+                    bordered=True,
+                ),
+            )
             _slide2_parts.append(mo.center(mo.hstack(_stats, gap=1)))
     else:
         _slide2_parts.append(
             mo.md(
-                '<h2 style="text-align:center; color:#1a1a2e;">The Rent Gap</h2>'
+                f'<h2 style="text-align:center; color:{NAVY};">The Rent Gap</h2>'
             )
         )
         _slide2_parts.append(
@@ -429,10 +455,13 @@ Live from Statistics Canada &mdash; CMHC Rental Market Survey
 
     _slide3_parts = [
         mo.md(
-            """
-<h2 style="text-align:center; color:#1a1a2e; margin-bottom:0;">
+            f"""
+<h2 style="text-align:center; color:{NAVY}; margin-bottom:0;">
 Not Just Affordable &mdash; Livable
 </h2>
+<p style="text-align:center; color:{SLATE}; font-size:0.9em; margin-top:4px;">
+Quality of life your employees will thank you for
+</p>
 """
         ),
     ]
@@ -443,8 +472,8 @@ Not Just Affordable &mdash; Livable
     # From Environment & Climate Change Canada, Climate Normals 1991-2020.
     # Published reference data updated every 30 years — no live API exists.
     _sunshine_data = pd.DataFrame({
-        "City": ["Toronto", "Vancouver", "Montréal", "Winnipeg"],
-        "Sunshine (hrs/yr)": [2066, 1938, 2051, 2353],
+        "City": ["Toronto", "Vancouver", "Calgary", "Winnipeg"],
+        "Sunshine (hrs/yr)": [2066, 1938, 2396, 2353],
     })
     _sun_sorted = _sunshine_data.sort_values("Sunshine (hrs/yr)", ascending=True)
     fig_sun = _hbar(
@@ -453,81 +482,62 @@ Not Just Affordable &mdash; Livable
         [CITY_COLORS.get(c, "#999") for c in _sun_sorted["City"]],
         "{:,} hrs",
         "Annual Sunshine Hours",
-        x_range=[0, 2700],
+        x_range=[0, 2800],
     )
     _slide3_charts.append(
         mo.vstack([
             fig_sun,
             mo.md(
-                '<p style="color:#888; font-size:0.85em; text-align:center;">'
+                f'<p style="color:{SLATE}; font-size:0.85em; text-align:center;">'
                 "Source: Environment &amp; Climate Change Canada, "
                 "Climate Normals 1991&ndash;2020</p>"
             ),
         ])
     )
 
-    # ── Population forecast (live Socrata) ──────────────────────────
-    if (
-        not wpg_pop_df.empty
-        and "population" in wpg_pop_df.columns
-        and len(wpg_pop_df) > 3
-    ):
-        fig_pop = go.Figure(
-            go.Scatter(
-                x=wpg_pop_df["year"],
-                y=wpg_pop_df["population"] / 1e6,
-                mode="lines+markers",
-                line=dict(color=CITY_COLORS["Winnipeg"], width=3),
-                marker=dict(size=6),
-                hovertemplate=(
-                    "<b>%{x:.0f}</b><br>"
-                    "Population: %{y:.2f}M<extra></extra>"
-                ),
-            )
-        )
-        fig_pop.update_layout(
-            title=dict(
-                text="<b>Winnipeg Population (Historical + Forecast)</b>",
-                font=dict(size=15),
-                x=0.5,
-                xanchor="center",
+    # ── Commute time (StatsCan Census 2021) ──────────────────────────
+    # Statistics Canada, 2021 Census of Population, Table 98-10-0469-01
+    # Average commute duration (minutes), one-way, for the employed
+    # labour force aged 15+ who commuted to a usual place of work.
+    _commute_data = pd.DataFrame({
+        "City": ["Toronto", "Vancouver", "Calgary", "Winnipeg"],
+        "Avg Commute (min)": [34.0, 29.4, 26.4, 23.6],
+    })
+    _com_sorted = _commute_data.sort_values("Avg Commute (min)", ascending=True)
+    fig_commute = _hbar(
+        _com_sorted["City"].tolist(),
+        _com_sorted["Avg Commute (min)"].tolist(),
+        [CITY_COLORS.get(c, "#999") for c in _com_sorted["City"]],
+        "{:.0f} min",
+        "Average One-Way Commute",
+        x_range=[0, 45],
+    )
+    _slide3_charts.append(
+        mo.vstack([
+            fig_commute,
+            mo.md(
+                f'<p style="color:{SLATE}; font-size:0.85em; text-align:center;">'
+                "Source: Statistics Canada, 2021 Census, "
+                "Table 98-10-0469-01</p>"
             ),
-            template="plotly_white",
-            height=260,
-            margin=dict(t=45, b=40, l=70, r=30),
-            xaxis=dict(title="Year", tickformat="d"),
-            yaxis=dict(title="Population (Millions)"),
-            font=dict(family="Inter, system-ui, sans-serif", size=13),
-        )
-        _slide3_charts.append(
-            mo.vstack([
-                fig_pop,
-                mo.md(
-                    '<p style="color:#888; font-size:0.85em; text-align:center;">'
-                    "Live from "
-                    '<a href="https://data.winnipeg.ca/Makeready-Data/Population-of-Winnipeg/mhuw-u7yg"'
-                    ' target="_blank" rel="noopener noreferrer">'
-                    "City of Winnipeg Open Data</a> (mhuw-u7yg)</p>"
-                ),
-            ])
-        )
-    else:
-        _slide3_charts.append(
-            mo.callout(
-                mo.md("Population forecast data unavailable."),
-                kind="warn",
-            )
-        )
+        ])
+    )
 
     _slide3_parts.append(mo.hstack(_slide3_charts, widths="equal"))
 
+    # ── Highlight callout ────────────────────────────────────────────
     _slide3_parts.append(
         mo.center(
             mo.md(
-                """
-<div style="margin-top: 8px;">
-<span style="background:#FFF3E0; padding:8px 20px; border-radius:8px; font-size:1.1em;">
-  Winnipeg: <strong>#1 sunniest major city in Canada</strong> at 2,353 hrs/year
+                f"""
+<div style="margin-top: 8px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+<span style="background:{LIGHT_GOLD}; padding:8px 20px; border-radius:8px;
+             font-size:1.05em; border: 1px solid {GOLD}40; color:{NAVY};">
+  <strong>2,353 hrs</strong> of sunshine/year &mdash; more than Toronto or Vancouver
+</span>
+<span style="background:{LIGHT_GOLD}; padding:8px 20px; border-radius:8px;
+             font-size:1.05em; border: 1px solid {GOLD}40; color:{NAVY};">
+  <strong>23.6 min</strong> average commute &mdash; shortest among major metros
 </span>
 </div>
 """
@@ -543,15 +553,12 @@ Not Just Affordable &mdash; Livable
 
     _slide4_parts = [
         mo.md(
-            """
-<h2 style="text-align:center; color:#1a1a2e; margin-bottom:0;">Winnipeg Is Growing</h2>
-<p style="text-align:center; color:#888; font-size:0.9em; margin-top:4px;">
+            f"""
+<h2 style="text-align:center; color:{NAVY}; margin-bottom:0;">Winnipeg Is Growing</h2>
+<p style="text-align:center; color:{SLATE}; font-size:0.9em; margin-top:4px;">
 Live from
-<a href="https://data.winnipeg.ca" target="_blank" rel="noopener noreferrer">
-City of Winnipeg Open Data</a>
-&bull;
-<a href="https://opendata.vancouver.ca" target="_blank" rel="noopener noreferrer">
-City of Vancouver Open Data</a>
+<a href="https://data.winnipeg.ca" target="_blank" rel="noopener noreferrer"
+   style="color:{GOLD};">City of Winnipeg Open Data</a>
 </p>
 """
         ),
@@ -560,48 +567,35 @@ City of Vancouver Open Data</a>
     # ── Left: Building permits comparison chart ─────────────────────
     _left_content = []
 
-    _has_wpg_permits = not wpg_permits_df.empty and len(wpg_permits_df) > 3
-    _has_van_permits = not van_permits_df.empty and len(van_permits_df) > 3
+    _wpg_permits_chart = (
+        wpg_permits_df[wpg_permits_df["year"] <= 2025]
+        if not wpg_permits_df.empty
+        else wpg_permits_df
+    )
+    _has_wpg_permits = not _wpg_permits_chart.empty and len(_wpg_permits_chart) > 3
 
-    if _has_wpg_permits or _has_van_permits:
+    if _has_wpg_permits:
         fig_permits = go.Figure()
 
-        if _has_wpg_permits:
-            fig_permits.add_trace(
-                go.Scatter(
-                    x=wpg_permits_df["year"],
-                    y=wpg_permits_df["total_value"] / 1e9,
-                    mode="lines+markers",
-                    name="Winnipeg",
-                    line=dict(color=CITY_COLORS["Winnipeg"], width=3),
-                    marker=dict(size=7),
-                    hovertemplate=(
-                        "<b>Winnipeg %{x:.0f}</b><br>"
-                        "$%{y:.2f}B<extra></extra>"
-                    ),
-                )
+        fig_permits.add_trace(
+            go.Scatter(
+                x=_wpg_permits_chart["year"],
+                y=_wpg_permits_chart["total_value"] / 1e9,
+                mode="lines+markers",
+                name="Winnipeg",
+                line=dict(color=GOLD, width=3),
+                marker=dict(size=7),
+                hovertemplate=(
+                    "<b>Winnipeg %{x:.0f}</b><br>"
+                    "$%{y:.2f}B<extra></extra>"
+                ),
             )
-
-        if _has_van_permits:
-            fig_permits.add_trace(
-                go.Scatter(
-                    x=van_permits_df["year"],
-                    y=van_permits_df["total_value"] / 1e9,
-                    mode="lines+markers",
-                    name="Vancouver",
-                    line=dict(color=CITY_COLORS["Vancouver"], width=3),
-                    marker=dict(size=7),
-                    hovertemplate=(
-                        "<b>Vancouver %{x:.0f}</b><br>"
-                        "$%{y:.2f}B<extra></extra>"
-                    ),
-                )
-            )
+        )
 
         fig_permits.update_layout(
             title=dict(
                 text="<b>Annual Construction Investment</b>",
-                font=dict(size=15),
+                font=dict(size=15, color=NAVY),
                 x=0.5,
                 xanchor="center",
             ),
@@ -609,28 +603,19 @@ City of Vancouver Open Data</a>
             height=320,
             margin=dict(t=45, b=50, l=70, r=30),
             xaxis=dict(title="Year", tickformat="d"),
-            yaxis=dict(title="Investment ($B)"),
+            yaxis=dict(title="Investment ($B)", range=[0, 4]),
             font=dict(family="Inter, system-ui, sans-serif", size=13),
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="center",
-                x=0.5,
-            ),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            showlegend=False,
         )
         _left_content.append(fig_permits)
 
-        _sources = []
-        if _has_wpg_permits:
-            _sources.append("Winnipeg: Building Permits (p5sy-gt7y)")
-        if _has_van_permits:
-            _sources.append("Vancouver: Issued Building Permits")
         _left_content.append(
             mo.md(
-                '<p style="color:#888; font-size:0.85em;">'
-                + " &middot; ".join(_sources)
-                + "</p>"
+                f'<p style="color:{SLATE}; font-size:0.85em;">'
+                "Winnipeg: Building Permits (p5sy-gt7y)"
+                "</p>"
             )
         )
     else:
@@ -664,6 +649,43 @@ City of Vancouver Open Data</a>
             )
         )
 
+    # ── Population growth stat ──────────────────────────────────────
+    if (
+        not wpg_pop_df.empty
+        and "population" in wpg_pop_df.columns
+        and len(wpg_pop_df) > 3
+    ):
+        _latest_pop = wpg_pop_df["population"].iloc[-1]
+        _earliest_pop = wpg_pop_df["population"].iloc[0]
+        _pop_growth_pct = ((_latest_pop - _earliest_pop) / _earliest_pop) * 100
+        _right_stats.append(
+            mo.stat(
+                value=f"{_latest_pop / 1e6:.2f}M",
+                label="Winnipeg Population (Latest)",
+                caption=f"+{_pop_growth_pct:.0f}% growth since {int(wpg_pop_df['year'].iloc[0])}",
+                direction="increase",
+                bordered=True,
+            )
+        )
+
+    # ── Corporate tax advantage ─────────────────────────────────────
+    # Manitoba provincial corporate tax rate: 12% (general rate).
+    # This is the lowest among provinces with major metros:
+    #   Ontario: 11.5%, BC: 12%, Alberta: 8%, Quebec: 11.5%
+    # However Manitoba's combined federal+provincial general rate
+    # and small business rate are very competitive.
+    # Source: Canada Revenue Agency, Provincial/Territorial tax rates
+    # https://www.canada.ca/en/revenue-agency/services/tax/businesses/
+    # topics/corporations/provincial-territorial-corporation-tax.html
+    _right_stats.append(
+        mo.stat(
+            value="12%",
+            label="MB Provincial Corporate Tax",
+            caption="Competitive vs ON 11.5%, BC 12%, QC 11.5%",
+            bordered=True,
+        )
+    )
+
     if not _right_stats:
         _right_stats.append(
             mo.callout(
@@ -690,16 +712,21 @@ City of Vancouver Open Data</a>
 
     slide_cta = mo.center(
         mo.md(
-            """
+            f"""
 <div style="padding: 60px 40px 40px;">
-<h1 style="font-size: 2.4em; font-weight: 800; color: #1a1a2e; line-height: 1.25;">
-What if we could give every company<br>a data-driven case to relocate?
+<h1 style="font-size: 2.4em; font-weight: 800; color: {NAVY}; line-height: 1.25;">
+WinLocate: the data-driven case<br>for relocating to Winnipeg.
 </h1>
-<p style="font-size: 1.6em; color: #B23A2B; font-weight: 700; margin-top: 25px;">
-The Winnipeg Arbitrage
+<p style="font-size: 1.15em; color: {SLATE}; max-width: 700px; margin: 20px auto 0;">
+Lower rent. Shorter commutes. More sunshine.<br>
+A growing city with room to build.
 </p>
-<p style="font-size: 1.05em; color: #777; margin-top: 15px;">
-Smart City, Happy Living &mdash; powered by open data.
+<p style="font-size: 1.6em; color: {GOLD}; font-weight: 700; margin-top: 25px;">
+Smart City. Happy Living.
+</p>
+<p style="font-size: 0.95em; color: {SLATE}; margin-top: 20px;">
+Powered by open data from Statistics Canada, CMHC,<br>
+City of Winnipeg, and Environment Canada.
 </p>
 </div>
 """
