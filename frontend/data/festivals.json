@@ -6,8 +6,7 @@
     "season": "winter",
     "description": "The largest French-language winter festival in Western Canada. Fort Gibralter, snow sculptures, live music, tourtière.",
     "attendance": "100,000+",
-    "neighborhood": "St. Boniface",
-    "emoji": "🎪"
+    "neighborhood": "St. Boniface"
   },
   {
     "id": "winnipeg-folk-festival",
@@ -16,8 +15,7 @@
     "season": "summer",
     "description": "One of the world's great outdoor music festivals. Seven stages, 80+ artists, Birds Hill Park.",
     "attendance": "45,000+",
-    "neighborhood": "Birds Hill Park",
-    "emoji": "🎸"
+    "neighborhood": "Birds Hill Park"
   },
   {
     "id": "folklorama",
@@ -26,8 +24,7 @@
     "season": "summer",
     "description": "The world's longest-running and largest multicultural festival. 40+ cultural pavilions across the city.",
     "attendance": "400,000+",
-    "neighborhood": "Citywide",
-    "emoji": "🌍"
+    "neighborhood": "Citywide"
   },
   {
     "id": "jazz-winnipeg",
@@ -36,8 +33,7 @@
     "season": "summer",
     "description": "10 days of world-class jazz across Exchange District venues, outdoor stages, and intimate clubs.",
     "attendance": "25,000+",
-    "neighborhood": "Exchange District",
-    "emoji": "🎷"
+    "neighborhood": "Exchange District"
   },
   {
     "id": "nuit-blanche",
@@ -46,18 +42,7 @@
     "season": "winter",
     "description": "All-night arts festival with free installations, performances, and open studios across the city.",
     "attendance": "10,000+",
-    "neighborhood": "Citywide",
-    "emoji": "🌙"
-  },
-  {
-    "id": "pride-winnipeg",
-    "name": "Pride Winnipeg",
-    "month": "June",
-    "season": "summer",
-    "description": "One of Canada's most celebrated Pride festivals with a massive parade through Osborne Village.",
-    "attendance": "60,000+",
-    "neighborhood": "Osborne Village",
-    "emoji": "🏳️‍🌈"
+    "neighborhood": "Citywide"
   },
   {
     "id": "fringe-festival",
@@ -66,8 +51,7 @@
     "season": "summer",
     "description": "Second largest fringe festival in North America. 170+ companies, 700+ performances over 11 days.",
     "attendance": "70,000+",
-    "neighborhood": "Exchange District",
-    "emoji": "🎭"
+    "neighborhood": "Exchange District"
   },
   {
     "id": "santa-claus-parade",
@@ -76,7 +60,6 @@
     "season": "fall",
     "description": "One of Canada's largest Santa Claus parades. A beloved Winnipeg tradition since 1909.",
     "attendance": "100,000+",
-    "neighborhood": "Downtown",
-    "emoji": "🎄"
+    "neighborhood": "Downtown"
   }
 ]

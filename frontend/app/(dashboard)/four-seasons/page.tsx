@@ -1,8 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Tent, Music2, Globe, Music, Moon, Theater, Gift, type LucideIcon } from "lucide-react";
 import { getFestivals } from "@/lib/api";
 import DataCard from "@/components/ui/DataCard";
+import SectionHeader from "@/components/ui/SectionHeader";
+
+const FESTIVAL_ICON: Record<string, LucideIcon> = {
+    "festival-du-voyageur": Tent,
+    "winnipeg-folk-festival": Music2,
+    "folklorama": Globe,
+    "jazz-winnipeg": Music,
+    "nuit-blanche": Moon,
+    "fringe-festival": Theater,
+    "santa-claus-parade": Gift,
+};
 
 const GRID_SEASONS = [
     {
@@ -45,12 +57,12 @@ export default function FourSeasonsPage() {
         >
             {/* Screen label */}
             <div className="px-6 pt-6">
-                <p
-                    className="text-[10px] font-semibold uppercase tracking-widest mb-4"
-                    style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
-                >
-                    Screen 7 — Four Seasons Living
-                </p>
+                {/* Screen label */}
+                <SectionHeader
+                    eyebrow="Life in Winnipeg"
+                    title="The Four Seasons of Winnipeg"
+                    subtitle="Experience the unique charm of Winnipeg through its vibrant seasons, each offering a distinct blend of culture, nature, and entertainment."
+                />
             </div>
 
             {/* Full-bleed 2×2 photography grid */}
@@ -122,7 +134,9 @@ export default function FourSeasonsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {festivals.map((f) => (
                         <DataCard key={f.id} hover>
-                            <div className="text-2xl mb-2">{f.emoji}</div>
+                            <div className="mb-2">
+                                {(() => { const Icon = FESTIVAL_ICON[f.id]; return Icon ? <Icon size={20} style={{ color: "#B99445" }} /> : null; })()}
+                            </div>
                             <p
                                 className="text-[13px] font-semibold text-frost-white mb-1 leading-snug"
                                 style={{ fontFamily: "var(--font-ibm-sans)" }}

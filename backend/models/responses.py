@@ -59,6 +59,8 @@ class TransitStopInfo(BaseModel):
     name: str
     distance_m: float
     routes: list[str]
+    lat: float | None = None
+    lng: float | None = None
 
 
 class ZoneSummary(BaseModel):
