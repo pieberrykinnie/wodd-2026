@@ -8,12 +8,14 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 interface CanadaMapProps {
     activeCity?: string;
+    flyToCoords?: [number, number];
 }
 
-const CITIES_TO_SHOW = ["toronto", "vancouver", "montreal", "winnipeg"];
+const CITIES_TO_SHOW = ["toronto", "vancouver", "montreal", "calgary", "ottawa", "winnipeg"];
 
-export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
+export default function CanadaMap({ activeCity = "toronto", flyToCoords }: CanadaMapProps) {
     const cities = getCities();
+    const [mapLoaded, setMapLoaded] = useState(false);
     const [popup, setPopup] = useState<City | null>(null);
     const [viewState, setViewState] = useState({
         longitude: -95,
@@ -21,8 +23,17 @@ export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
         zoom: 3.2,
     });
 
-    // Fly to active city when it changes
+    // Fly to custom coords (geocoded) or fall back to known city
     useEffect(() => {
+        if (flyToCoords) {
+            setViewState((v) => ({
+                ...v,
+                longitude: flyToCoords[0],
+                latitude: flyToCoords[1],
+                zoom: 8,
+            }));
+            return;
+        }
         const coords = CITY_COORDS[activeCity];
         if (coords) {
             setViewState((v) => ({
@@ -32,10 +43,10 @@ export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
                 zoom: 6,
             }));
         }
-    }, [activeCity]);
+    }, [activeCity, flyToCoords]);
 
     return (
-        <div className="relative w-full h-full rounded-xl overflow-hidden">
+        <div className="relative w-full h-full rounded overflow-hidden">
             <Map
                 {...viewState}
                 onMove={(e) => setViewState(e.viewState)}
@@ -43,10 +54,11 @@ export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
                 mapStyle={MAPBOX_STYLE}
                 style={{ width: "100%", height: "100%" }}
                 attributionControl={false}
+                onLoad={() => setMapLoaded(true)}
             >
                 <NavigationControl position="top-right" showCompass={false} />
 
-                {cities
+                {mapLoaded && cities
                     .filter((c) => CITIES_TO_SHOW.includes(c.id))
                     .map((city) => {
                         const isActive = city.id === activeCity;
@@ -85,22 +97,42 @@ export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
                                         className="relative w-4 h-4 rounded-full border-2 border-white shadow-lg"
                                         style={{ background: city.color }}
                                     />
-                                    {/* Cost chip */}
-                                    <div
-                                        className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-full text-[10px] font-semibold text-white border border-white/20 shadow"
-                                        style={{
-                                            background: city.color,
-                                            fontFamily: "var(--font-ibm-mono)",
-                                        }}
-                                    >
-                                        {city.id === "winnipeg" ? "Index 88" : `Index ${city.costIndex}`}
-                                    </div>
+                                    {/* Cost chip — hide on the static marker when a geocoded pin overrides it */}
+                                    {isActive && !flyToCoords && (
+                                        <div
+                                            className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded text-[10px] font-semibold text-white border border-white/20 shadow"
+                                            style={{ background: city.color, fontFamily: "var(--font-ibm-mono)" }}
+                                        >
+                                            {`Index ${city.costIndex}`}
+                                        </div>
+                                    )}
                                 </div>
                             </Marker>
                         );
                     })}
 
-                {popup && (
+                {/* Custom geocoded location pin */}
+                {mapLoaded && flyToCoords && (() => {
+                    const activeData = cities.find((c) => c.id === activeCity);
+                    return (
+                        <Marker longitude={flyToCoords[0]} latitude={flyToCoords[1]} anchor="bottom">
+                            <div className="relative flex flex-col items-center">
+                                {activeData && (
+                                    <div
+                                        className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded text-[10px] font-semibold text-white border border-white/20 shadow"
+                                        style={{ background: activeData.color, fontFamily: "var(--font-ibm-mono)" }}
+                                    >
+                                        {`Index ${activeData.costIndex}`}
+                                    </div>
+                                )}
+                                <div className="w-4 h-4 rounded-full bg-exchange-brick border-2 border-white shadow-lg" />
+                                <div className="w-0.5 h-3 bg-exchange-brick" />
+                            </div>
+                        </Marker>
+                    );
+                })()}
+
+                {mapLoaded && popup && (
                     <Popup
                         longitude={popup.coords[0]}
                         latitude={popup.coords[1]}
@@ -121,13 +153,13 @@ export default function CanadaMap({ activeCity = "toronto" }: CanadaMapProps) {
                                 </div>
                                 <div className="flex justify-between gap-6">
                                     <span className="text-concrete-gray">Office Rent</span>
-                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: "#C8A44D" }}>
+                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: "#4C6E91" }}>
                                         ${popup.officeSqft}/sqft
                                     </span>
                                 </div>
                                 <div className="flex justify-between gap-6">
                                     <span className="text-concrete-gray">Avg Home</span>
-                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: "#C8A44D" }}>
+                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: "#4C6E91" }}>
                                         ${(popup.homePrice / 1000).toFixed(0)}K
                                     </span>
                                 </div>

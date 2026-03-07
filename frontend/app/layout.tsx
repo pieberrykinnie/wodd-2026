@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { Playfair_Display, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, DM_Sans, Barlow } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const ibmPlexSans = IBM_Plex_Sans({
+const dmSans = DM_Sans({
   variable: "--font-ibm-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const barlow = Barlow({
   variable: "--font-ibm-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -27,6 +27,14 @@ export const metadata: Metadata = {
   title: "Winnipeg Relocation Intelligence",
   description:
     "The most persuasive relocation argument a CFO and HR Director could see in the same room.",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -35,8 +43,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} antialiased`}
-        style={{ fontFamily: "'IBM Plex Sans', system-ui, sans-serif" }}
+        className={`${plusJakartaSans.variable} ${dmSans.variable} ${barlow.variable} antialiased`}
+        style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
       >
         {children}
       </body>

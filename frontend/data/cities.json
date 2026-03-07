@@ -4,7 +4,7 @@
     "name": "Toronto",
     "province": "ON",
     "coords": [-79.3832, 43.6532],
-    "costIndex": 142,
+    "costIndex": 3,
     "homePrice": 1100000,
     "officeSqft": 42,
     "avgCommute": 75,
@@ -18,7 +18,7 @@
     "walkscore": 72,
     "comparisons": {
       "vs_winnipeg_office_savings_pct": 62,
-      "vs_winnipeg_home_savings_pct": 68,
+      "vs_winnipeg_home_savings_pct": 67,
       "vs_winnipeg_commute_delta": 55
     }
   },
@@ -27,11 +27,11 @@
     "name": "Vancouver",
     "province": "BC",
     "coords": [-123.1207, 49.2827],
-    "costIndex": 156,
-    "homePrice": 1400000,
+    "costIndex": 1,
+    "homePrice": 1270000,
     "officeSqft": 48,
     "avgCommute": 62,
-    "avgSalary": 90000,
+    "avgSalary": 92000,
     "monthlyRent2br": 3800,
     "taxRate": 0.462,
     "color": "#4C6E91",
@@ -41,7 +41,7 @@
     "walkscore": 78,
     "comparisons": {
       "vs_winnipeg_office_savings_pct": 67,
-      "vs_winnipeg_home_savings_pct": 75,
+      "vs_winnipeg_home_savings_pct": 71,
       "vs_winnipeg_commute_delta": 42
     }
   },
@@ -50,7 +50,7 @@
     "name": "Montréal",
     "province": "QC",
     "coords": [-73.5673, 45.5017],
-    "costIndex": 118,
+    "costIndex": 6,
     "homePrice": 650000,
     "officeSqft": 28,
     "avgCommute": 52,
@@ -64,8 +64,54 @@
     "walkscore": 64,
     "comparisons": {
       "vs_winnipeg_office_savings_pct": 43,
-      "vs_winnipeg_home_savings_pct": 46,
+      "vs_winnipeg_home_savings_pct": 44,
       "vs_winnipeg_commute_delta": 32
+    }
+  },
+  {
+    "id": "calgary",
+    "name": "Calgary",
+    "province": "AB",
+    "coords": [-114.0719, 51.0447],
+    "costIndex": 7,
+    "homePrice": 560000,
+    "officeSqft": 20,
+    "avgCommute": 32,
+    "avgSalary": 88000,
+    "monthlyRent2br": 2100,
+    "taxRate": 0.39,
+    "color": "#D89C3D",
+    "climate": "Semi-Arid Continental",
+    "sunshineHours": 2396,
+    "transitScore": 52,
+    "walkscore": 49,
+    "comparisons": {
+      "vs_winnipeg_office_savings_pct": 20,
+      "vs_winnipeg_home_savings_pct": 35,
+      "vs_winnipeg_commute_delta": 12
+    }
+  },
+  {
+    "id": "ottawa",
+    "name": "Ottawa",
+    "province": "ON",
+    "coords": [-75.6972, 45.4215],
+    "costIndex": 6,
+    "homePrice": 665000,
+    "officeSqft": 24,
+    "avgCommute": 45,
+    "avgSalary": 90000,
+    "monthlyRent2br": 2300,
+    "taxRate": 0.456,
+    "color": "#8B6098",
+    "climate": "Humid Continental",
+    "sunshineHours": 2024,
+    "transitScore": 65,
+    "walkscore": 58,
+    "comparisons": {
+      "vs_winnipeg_office_savings_pct": 33,
+      "vs_winnipeg_home_savings_pct": 45,
+      "vs_winnipeg_commute_delta": 25
     }
   },
   {
@@ -73,11 +119,11 @@
     "name": "Winnipeg",
     "province": "MB",
     "coords": [-97.1384, 49.8951],
-    "costIndex": 88,
-    "homePrice": 350000,
+    "costIndex": 10,
+    "homePrice": 363000,
     "officeSqft": 16,
     "avgCommute": 20,
-    "avgSalary": 82000,
+    "avgSalary": 78000,
     "monthlyRent2br": 1450,
     "taxRate": 0.439,
     "color": "#B23A2B",

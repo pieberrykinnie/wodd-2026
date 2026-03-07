@@ -1,200 +1,123 @@
 "use client";
 
-import SectionHeader from "@/components/ui/SectionHeader";
-import DataCard from "@/components/ui/DataCard";
-import InsightBanner from "@/components/ui/InsightBanner";
-import MetricTile from "@/components/ui/MetricTile";
+import { motion } from "framer-motion";
 import { getFestivals } from "@/lib/api";
-import { Sun, Snowflake, Leaf, Cloud } from "lucide-react";
+import DataCard from "@/components/ui/DataCard";
 
-const SEASONS = [
+const GRID_SEASONS = [
     {
-        id: "summer",
-        label: "Summer",
-        icon: Sun,
-        color: "#C8A44D",
-        months: "June – August",
-        description:
-            "Winnipeg summers are spectacular. Warm, dry, and sunny — with more sunshine hours than Vancouver or Toronto. Patios at The Forks, lake weekends at Whiteshell Provincial Park, and a festival nearly every weekend.",
-        facts: [
-            "Avg summer high: 27°C",
-            "2,353 sunshine hours per year",
-            "Whiteshell Provincial Park: 45 min away",
-            "Festival season runs June–August",
-        ],
-        imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+        season: "summer",
+        label: "Summer · Whiteshell Lakes",
+        imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80",
     },
     {
-        id: "fall",
-        label: "Autumn",
-        icon: Leaf,
-        color: "#D89C3D",
-        months: "September – October",
-        description:
-            "Winnipeg's autumn is brief and beautiful. Crisp, golden, and brilliant. The trees along the Assiniboine River turn vivid amber and red. Comfortable temperatures and clear blue skies.",
-        facts: [
-            "Avg fall temp: 12°C",
-            "River trail golf and cycling",
-            "Harvest festivals and markets",
-            "One of Canada's clearest autumns",
-        ],
-        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+        season: "winter",
+        label: "Winter · Festival du Voyageur",
+        imageUrl: "https://images.unsplash.com/photo-1551582045-6ec9c11d8697?w=1200&q=80",
     },
     {
-        id: "winter",
-        label: "Winter",
-        icon: Snowflake,
-        color: "#4C6E91",
-        months: "November – March",
-        description:
-            "Yes, Winnipeg winters are cold. They're also brilliant. The city is fully adapted — underground tunnels, warm community spaces, the world's longest naturally frozen skating rink, and Festival du Voyageur. Winnipeggers don't fear winter; they own it.",
-        facts: [
-            "World's longest skating rink on the Red River",
-            "Festival du Voyageur (February)",
-            "Nuit Blanche all-night arts festival",
-            "Block heater culture makes cold cars a myth",
-        ],
-        imageUrl: "https://images.unsplash.com/photo-1551582045-6ec9c11d8697?w=800&q=80",
+        season: "autumn",
+        label: "Autumn · Assiniboine Park",
+        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80",
     },
     {
-        id: "spring",
-        label: "Spring",
-        icon: Cloud,
-        color: "#5E8C6A",
-        months: "April – May",
-        description:
-            "Spring in Winnipeg arrives fast and dramatically. Snow melts to green within weeks. River walks reopen, patios emerge, and the city collectively exhales. Spring is earned — which makes it sweeter.",
-        facts: [
-            "Temperature swings from -5°C to +20°C",
-            "Red River flooding (dramatic but managed)",
-            "Bird migration through Winnipeg corridor",
-            "Community leagues host outdoor events",
-        ],
-        imageUrl: "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=800&q=80",
+        season: "spring",
+        label: "Spring · The Forks",
+        imageUrl: "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=1200&q=80",
     },
 ];
 
-const CITY_SUNSHINE: { city: string; hours: number; color: string }[] = [
-    { city: "Vancouver", hours: 1938, color: "#4C6E91" },
-    { city: "Toronto", hours: 2066, color: "#8B98A5" },
-    { city: "Montréal", hours: 2051, color: "#5E8C6A" },
-    { city: "Winnipeg", hours: 2353, color: "#B23A2B" },
+const STAT_STRIP = [
+    { value: "2,353 sunshine hours", sub: "More than Vancouver" },
+    { value: "4 major festivals/year", sub: "Celebrating every season" },
+    { value: "Whiteshell: 90 min away", sub: "Provincial park escape" },
+    { value: "Avg. concert ticket: $45", sub: "vs $140 Toronto" },
 ];
 
 export default function FourSeasonsPage() {
     const festivals = getFestivals();
 
     return (
-        <div className="p-6 md:p-8 flex flex-col gap-8">
-            <SectionHeader
-                eyebrow="Life in Winnipeg"
-                title="Four Seasons, Zero Apologies"
-                subtitle="Winnipeg doesn't hide its weather. It turns it into culture. Every season has a reason to stay."
-            />
-
-            {/* Sunshine comparison */}
-            <div>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+        >
+            {/* Screen label */}
+            <div className="px-6 pt-6">
                 <p
-                    className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                    className="text-[10px] font-semibold uppercase tracking-widest mb-4"
+                    style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
                 >
-                    Sunshine Hours per Year — The Number That Surprises Everyone
+                    Screen 7 — Four Seasons Living
                 </p>
-                <div className="space-y-3">
-                    {CITY_SUNSHINE.sort((a, b) => a.hours - b.hours).map((c) => (
-                        <div key={c.city}>
-                            <div className="flex justify-between mb-1.5">
-                                <p
-                                    className={`text-[13px] ${c.city === "Winnipeg" ? "font-semibold text-frost-white" : "text-concrete-gray"}`}
-                                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                >
-                                    {c.city}
-                                </p>
-                                <p
-                                    className="text-[13px] font-semibold"
-                                    style={{ fontFamily: "var(--font-ibm-mono)", color: c.color }}
-                                >
-                                    {c.hours.toLocaleString()} hrs
-                                </p>
-                            </div>
-                            <div className="h-2.5 bg-river-slate rounded-full overflow-hidden">
-                                <div
-                                    className="h-full rounded-full"
-                                    style={{
-                                        width: `${(c.hours / 2500) * 100}%`,
-                                        background: c.color,
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <InsightBanner variant="highlight" className="mt-4">
-                    Winnipeg receives <strong style={{ color: "#C8A44D" }}>2,353 sunshine hours per year</strong> —
-                    more than any other major Canadian city, including Vancouver. The &quot;cold dark city&quot; narrative
-                    is statistically backwards.
-                </InsightBanner>
             </div>
 
-            {/* Season cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {SEASONS.map((season) => {
-                    const Icon = season.icon;
-                    return (
-                        <DataCard key={season.id}>
-                            <div className="flex items-start gap-3 mb-3">
-                                <div
-                                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                                    style={{ background: season.color + "22" }}
-                                >
-                                    <Icon size={18} style={{ color: season.color }} />
-                                </div>
-                                <div>
-                                    <p
-                                        className="text-sm font-semibold text-frost-white"
-                                        style={{ fontFamily: "var(--font-display)" }}
-                                    >
-                                        {season.label}
-                                    </p>
-                                    <p
-                                        className="text-[11px] text-concrete-gray"
-                                        style={{ fontFamily: "var(--font-ibm-mono)" }}
-                                    >
-                                        {season.months}
-                                    </p>
-                                </div>
-                            </div>
+            {/* Full-bleed 2×2 photography grid */}
+            <div className="grid grid-cols-2 grid-rows-2" style={{ height: "clamp(440px, 58vh, 620px)" }}>
+                {GRID_SEASONS.map((s) => (
+                    <div key={s.season} className="relative overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={s.imageUrl}
+                            alt={s.label}
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        {/* Dark gradient overlay */}
+                        <div
+                            className="absolute inset-0"
+                            style={{
+                                background:
+                                    "linear-gradient(to top, rgba(10,15,24,0.92) 0%, rgba(10,15,24,0.35) 55%, rgba(10,15,24,0.1) 100%)",
+                            }}
+                        />
+                        {/* Headline — Fraunces (var(--font-display)) Bold */}
+                        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
                             <p
-                                className="text-[13px] text-frost-white/80 leading-relaxed mb-3"
-                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                className="text-white font-bold leading-tight"
+                                style={{
+                                    fontFamily: "var(--font-display)",
+                                    fontSize: "clamp(15px, 2vw, 24px)",
+                                    textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+                                }}
                             >
-                                {season.description}
+                                {s.label}
                             </p>
-                            <ul className="space-y-1.5">
-                                {season.facts.map((fact) => (
-                                    <li key={fact} className="flex items-start gap-2">
-                                        <div
-                                            className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0"
-                                            style={{ background: season.color }}
-                                        />
-                                        <p className="text-[12px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                                            {fact}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
-                        </DataCard>
-                    );
-                })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Stat strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4" style={{ background: "#2F3E4F" }}>
+                {STAT_STRIP.map((stat, i) => (
+                    <div
+                        key={i}
+                        className="px-6 py-5 border-r border-white/10 last:border-r-0"
+                    >
+                        <p
+                            className="text-[14px] font-semibold leading-snug"
+                            style={{ color: "#C8A44D", fontFamily: "var(--font-ibm-mono)" }}
+                        >
+                            {stat.value}
+                        </p>
+                        <p
+                            className="text-[12px] mt-1"
+                            style={{ color: "rgba(200,164,77,0.55)", fontFamily: "var(--font-ibm-sans)" }}
+                        >
+                            {stat.sub}
+                        </p>
+                    </div>
+                ))}
             </div>
 
             {/* Festival grid */}
-            <div>
+            <div className="px-6 md:px-8 pt-8 pb-4">
                 <p
                     className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4"
                     style={{ fontFamily: "var(--font-ibm-sans)" }}
                 >
-                    Festivals & Events — The Cultural Calendar
+                    Festivals &amp; Events — The Cultural Calendar
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {festivals.map((f) => (
@@ -207,15 +130,12 @@ export default function FourSeasonsPage() {
                                 {f.name}
                             </p>
                             <p
-                                className="text-[11px] text-exchange-brick font-semibold mb-1"
-                                style={{ fontFamily: "var(--font-ibm-mono)" }}
+                                className="text-[11px] font-semibold mb-1"
+                                style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
                             >
                                 {f.month}
                             </p>
-                            <p
-                                className="text-[11px] text-concrete-gray line-clamp-2"
-                                style={{ fontFamily: "var(--font-ibm-sans)" }}
-                            >
+                            <p className="text-[11px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
                                 {f.attendance} attendees
                             </p>
                         </DataCard>
@@ -223,45 +143,45 @@ export default function FourSeasonsPage() {
                 </div>
             </div>
 
-            {/* Cost of entertainment */}
-            <DataCard>
-                <p
-                    className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    Entertainment Cost Comparison — Same Night Out
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[
-                        { city: "Toronto", dinner: 90, concert: 85, hockey: 220, color: "#8B98A5" },
-                        { city: "Vancouver", dinner: 95, concert: 90, hockey: 240, color: "#4C6E91" },
-                        { city: "Winnipeg", dinner: 55, concert: 45, hockey: 75, color: "#B23A2B" },
-                    ].map((c) => (
-                        <div key={c.city} className="bg-prairie-blue/50 rounded-xl p-4">
-                            <p
-                                className="text-sm font-semibold mb-3"
-                                style={{ color: c.color, fontFamily: "var(--font-ibm-sans)" }}
-                            >
-                                {c.city}
-                            </p>
-                            <div className="space-y-2 text-[12px]">
-                                <div className="flex justify-between">
-                                    <span className="text-concrete-gray">Dinner for 2</span>
-                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: c.color }}>${c.dinner}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-concrete-gray">Concert ticket</span>
-                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: c.color }}>${c.concert}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-concrete-gray">NHL game (avg)</span>
-                                    <span style={{ fontFamily: "var(--font-ibm-mono)", color: c.color }}>${c.hockey}</span>
+            {/* Entertainment cost comparison */}
+            <div className="px-6 md:px-8 pb-8">
+                <DataCard>
+                    <p
+                        className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4"
+                        style={{ fontFamily: "var(--font-ibm-sans)" }}
+                    >
+                        Entertainment Cost Comparison — Same Night Out
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {[
+                            { city: "Toronto", dinner: 90, concert: 85, hockey: 220, color: "#8B98A5" },
+                            { city: "Vancouver", dinner: 95, concert: 90, hockey: 240, color: "#4C6E91" },
+                            { city: "Winnipeg", dinner: 55, concert: 45, hockey: 75, color: "#B23A2B" },
+                        ].map((c) => (
+                            <div key={c.city} className="rounded-lg p-4" style={{ background: "#F7F9FB" }}>
+                                <p
+                                    className="text-sm font-semibold mb-3"
+                                    style={{ color: c.color, fontFamily: "var(--font-ibm-sans)" }}
+                                >
+                                    {c.city}
+                                </p>
+                                <div className="space-y-2 text-[12px]">
+                                    {[
+                                        ["Dinner for 2", c.dinner],
+                                        ["Concert ticket", c.concert],
+                                        ["NHL game (avg)", c.hockey],
+                                    ].map(([label, val]) => (
+                                        <div key={String(label)} className="flex justify-between">
+                                            <span className="text-concrete-gray">{label}</span>
+                                            <span style={{ fontFamily: "var(--font-ibm-mono)", color: c.color }}>${val}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </DataCard>
-        </div>
+                        ))}
+                    </div>
+                </DataCard>
+            </div>
+        </motion.div>
     );
 }

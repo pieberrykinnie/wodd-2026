@@ -10,10 +10,10 @@ const VARIANTS: Record<BannerVariant, {
     text: string;
     icon: React.ElementType;
 }> = {
-    insight: { bg: "rgba(216,156,61,0.08)", border: "rgba(216,156,61,0.25)", text: "#D89C3D", icon: Lightbulb },
-    tip: { bg: "rgba(76,110,145,0.1)", border: "rgba(76,110,145,0.25)", text: "#4C6E91", icon: Info },
-    highlight: { bg: "rgba(200,164,77,0.1)", border: "rgba(200,164,77,0.25)", text: "#C8A44D", icon: TrendingUp },
-    warning: { bg: "rgba(178,58,43,0.08)", border: "rgba(178,58,43,0.25)", text: "#B23A2B", icon: AlertCircle },
+    insight: { bg: "rgba(185,148,69,0.08)", border: "rgba(185,148,69,0.25)", text: "#4C6E91", icon: Lightbulb },
+    tip: { bg: "rgba(73,87,94,0.1)", border: "rgba(73,87,94,0.25)", text: "#49575E", icon: Info },
+    highlight: { bg: "rgba(185,148,69,0.1)", border: "rgba(185,148,69,0.25)", text: "#4C6E91", icon: TrendingUp },
+    warning: { bg: "rgba(185,148,69,0.08)", border: "rgba(185,148,69,0.25)", text: "#4C6E91", icon: AlertCircle },
 };
 
 interface InsightBannerProps {
@@ -32,7 +32,7 @@ export default function InsightBanner({
 
     return (
         <div
-            className={["flex items-start gap-3 rounded-xl p-4 border", className].join(" ")}
+            className={["flex items-start gap-3 rounded p-4 border", className].join(" ")}
             style={{ background: v.bg, borderColor: v.border }}
         >
             <Icon

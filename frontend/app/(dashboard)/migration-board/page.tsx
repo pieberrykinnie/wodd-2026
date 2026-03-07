@@ -19,7 +19,7 @@ const BUSINESS_PHASES = [
     {
         month: "Month 1",
         title: "Foundation",
-        color: "#C8A44D",
+        color: "#4C6E91",
         tasks: [
             "Incorporate Manitoba subsidiary or register as extra-provincial company",
             "Sign lease for Winnipeg office space (Exchange District or True North Square)",
@@ -67,7 +67,7 @@ const EMPLOYEE_CHECKLIST = [
     },
     {
         category: "Provincial Switches",
-        color: "#C8A44D",
+        color: "#4C6E91",
         items: [
             { label: "Health card: switch to Manitoba Health (90-day wait waived for new residents)", done: false },
             { label: "Driver's licence: province-to-province exchange", done: false },
@@ -91,7 +91,7 @@ const DISCOVERY_ITINERARY = [
     {
         day: "Day 1",
         title: "The Urban Core",
-        color: "#B23A2B",
+        color: "#4C6E91",
         items: [
             { time: "Morning", label: "Check in to The Fort Garry Hotel (Exchange District)" },
             { time: "Afternoon", label: "Walking tour of Exchange District heritage buildings" },
@@ -116,10 +116,10 @@ const DISCOVERY_ITINERARY = [
 
 const SEASONAL_EVENTS = [
     { name: "Festival du Voyageur", when: "February", tagColor: "#4C6E91" },
-    { name: "Jazz Winnipeg Festival", when: "June", tagColor: "#C8A44D" },
+    { name: "Jazz Winnipeg Festival", when: "June", tagColor: "#4C6E91" },
     { name: "Fringe Theatre Festival", when: "July", tagColor: "#5E8C6A" },
-    { name: "Folklorama", when: "August", tagColor: "#D89C3D" },
-    { name: "Nuit Blanche", when: "February", tagColor: "#B23A2B" },
+    { name: "Folklorama", when: "August", tagColor: "#4C6E91" },
+    { name: "Nuit Blanche", when: "February", tagColor: "#4C6E91" },
 ];
 
 export default function MigrationBoardPage() {
@@ -176,7 +176,7 @@ export default function MigrationBoardPage() {
             </div>
 
             <TabsPrimitive.Root defaultValue="business" className="flex flex-col gap-5">
-                <TabsPrimitive.List className="flex gap-1 bg-river-slate/50 p-1 rounded-xl w-fit flex-wrap">
+                <TabsPrimitive.List className="flex gap-1 bg-river-slate/50 p-1 rounded w-fit flex-wrap">
                     {[
                         { value: "business", label: "Business Track" },
                         { value: "employee", label: "Employee Track" },
@@ -185,7 +185,7 @@ export default function MigrationBoardPage() {
                         <TabsPrimitive.Trigger
                             key={t.value}
                             value={t.value}
-                            className="px-5 py-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-exchange-brick data-[state=active]:text-white data-[state=inactive]:text-concrete-gray data-[state=inactive]:hover:text-frost-white"
+                            className="px-5 py-2 rounded text-sm font-medium transition-all data-[state=active]:bg-exchange-brick data-[state=active]:text-white data-[state=inactive]:text-concrete-gray data-[state=inactive]:hover:text-frost-white"
                             style={{ fontFamily: "var(--font-ibm-sans)" }}
                         >
                             {t.label}
@@ -220,12 +220,12 @@ export default function MigrationBoardPage() {
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 {aiPlan.phases.map((phase, i) => {
-                                    const color = ["#C8A44D", "#4C6E91", "#5E8C6A", "#B23A2B"][i % 4];
+                                    const color = ["#4C6E91", "#4C6E91", "#5E8C6A", "#4C6E91"][i % 4];
                                     return (
                                         <DataCard key={phase.phase}>
                                             <div className="flex items-center gap-2 mb-4">
                                                 <div
-                                                    className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                                    className="px-2 py-0.5 rounded text-[11px] font-semibold"
                                                     style={{ background: color + "22", color, fontFamily: "var(--font-ibm-mono)" }}
                                                 >
                                                     Month {phase.month_start}–{phase.month_end}
@@ -240,7 +240,7 @@ export default function MigrationBoardPage() {
                                             <ul className="space-y-2">
                                                 {phase.actions.map((action) => (
                                                     <li key={action} className="flex items-start gap-2">
-                                                        <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
+                                                        <div className="w-1.5 h-1.5 rounded mt-1.5 flex-shrink-0" style={{ background: color }} />
                                                         <p className="text-[12px] text-frost-white/80 leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>
                                                             {action}
                                                         </p>
@@ -259,7 +259,7 @@ export default function MigrationBoardPage() {
                                     </p>
                                     <div className="space-y-3">
                                         {aiPlan.risks_and_mitigations.map((r, i) => (
-                                            <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-3 border-b border-white/5 last:border-0 last:pb-0">
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-3 border-b border-gray-200 last:border-0 last:pb-0">
                                                 <div>
                                                     <p className="text-[10px] font-semibold text-exchange-brick mb-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>RISK</p>
                                                     <p className="text-[13px] text-frost-white leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>{r.risk}</p>
@@ -283,7 +283,7 @@ export default function MigrationBoardPage() {
                                 <DataCard key={phase.month}>
                                     <div className="flex items-center gap-2 mb-4">
                                         <div
-                                            className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                            className="px-2 py-0.5 rounded text-[11px] font-semibold"
                                             style={{
                                                 background: phase.color + "22",
                                                 color: phase.color,
@@ -303,7 +303,7 @@ export default function MigrationBoardPage() {
                                         {phase.tasks.map((task) => (
                                             <li key={task} className="flex items-start gap-2">
                                                 <div
-                                                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                                                    className="w-1.5 h-1.5 rounded mt-1.5 flex-shrink-0"
                                                     style={{ background: phase.color }}
                                                 />
                                                 <p
@@ -323,7 +323,7 @@ export default function MigrationBoardPage() {
                     <div className="mt-4">
                         <InsightBanner variant="insight">
                             Manitoba&apos;s Business Immigration Program and the{" "}
-                            <strong style={{ color: "#D89C3D" }}>Manitoba Start Program</strong> offer navigated pathways for
+                            <strong style={{ color: "#4C6E91" }}>Manitoba Start Program</strong> offer navigated pathways for
                             companies registering from other provinces. Economic Development Winnipeg provides free concierge
                             onboarding for qualifying relocations.
                         </InsightBanner>
@@ -400,7 +400,7 @@ export default function MigrationBoardPage() {
                         {DISCOVERY_ITINERARY.map((day) => (
                             <DataCard key={day.day}>
                                 <div
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold mb-4"
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold mb-4"
                                     style={{
                                         background: day.color + "22",
                                         color: day.color,
@@ -444,7 +444,7 @@ export default function MigrationBoardPage() {
                             {SEASONAL_EVENTS.map((ev) => (
                                 <div
                                     key={ev.name}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px]"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded border text-[12px]"
                                     style={{
                                         borderColor: ev.tagColor + "33",
                                         background: ev.tagColor + "11",
@@ -483,7 +483,7 @@ function ChecklistSection({
         <DataCard>
             <div className="flex items-center gap-2 mb-4">
                 <div
-                    className="w-2 h-2 rounded-full"
+                    className="w-2 h-2 rounded"
                     style={{ background: section.color }}
                 />
                 <p

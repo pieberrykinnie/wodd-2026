@@ -6,6 +6,7 @@ export interface CompanyProfile {
   companyName: string;
   city: string;
   cityId: string;
+  cityCoords: [number, number] | null;
   industry: string;
   employees: number;
   salaryBand: string;
@@ -25,6 +26,7 @@ const defaults: CompanyProfile = {
   companyName: "",
   city: "Toronto",
   cityId: "toronto",
+  cityCoords: null,
   industry: "",
   employees: 50,
   salaryBand: "$75K–$100K",

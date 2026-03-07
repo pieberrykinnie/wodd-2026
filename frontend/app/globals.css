@@ -2,28 +2,28 @@
 
 @theme {
   /* ── Brand Palette ──────────────────────────────── */
-  --color-prairie-blue:    #1C2A39;
-  --color-prairie-blue-l:  #24384C;
-  --color-exchange-brick:  #B23A2B;
-  --color-prairie-gold:    #C8A44D;
-  --color-river-slate:     #2F3E4F;
-  --color-river-slate-l:   #3A4E62;
-  --color-frost-white:     #F2F5F7;
-  --color-lake-green:      #5E8C6A;
-  --color-warm-amber:      #D89C3D;
-  --color-concrete-gray:   #8B98A5;
-  --color-cool-blue:       #4C6E91;
+  --color-prairie-blue:    #FFFFFF;  /* White — primary background */
+  --color-prairie-blue-l:  #F7F9FB;  /* Off-white — secondary background */
+  --color-exchange-brick:  #B23A2B;  /* Brick Red — CTA */
+  --color-prairie-gold:    #4C6E91;  /* Steel Blue — accent */
+  --color-river-slate:     #F1F4F7;  /* Light Gray — cards / panels */
+  --color-river-slate-l:   #E8EDF2;  /* Light Gray lighter */
+  --color-frost-white:     #0F1823;  /* Dark text */
+  --color-lake-green:      #5E8C6A;  /* Green */
+  --color-warm-amber:      #4C6E91;  /* Steel Blue — data accent */
+  --color-concrete-gray:   #64748B;  /* Gray — labels / secondary */
+  --color-cool-blue:       #4C6E91;  /* Steel Blue — info / chart series */
 
   /* ── Persona Colors ─────────────────────────────── */
-  --color-persona-creative: #D89C3D;
-  --color-persona-family:   #5E8C6A;
-  --color-persona-exec:     #B23A2B;
-  --color-persona-pro:      #4C6E91;
+  --color-persona-creative: #4C6E91;  /* Steel Blue */
+  --color-persona-family:   #5E8C6A;  /* Green */
+  --color-persona-exec:     #B23A2B;  /* Brick Red */
+  --color-persona-pro:      #4C6E91;  /* Steel Blue */
 
   /* ── Fonts ──────────────────────────────────────── */
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'Barlow', system-ui, sans-serif;
 }
 
 /* ── Base ───────────────────────────────────────────── */
@@ -31,9 +31,9 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #1C2A39;
-  color: #F2F5F7;
-  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background-color: #FFFFFF;
+  color: #0F1823;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -57,18 +57,18 @@ body {
 
 /* ── Scrollbar ──────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 5px; height: 5px; }
-::-webkit-scrollbar-track    { background: #1C2A39; }
-::-webkit-scrollbar-thumb    { background: #2F3E4F; border-radius: 3px; }
+::-webkit-scrollbar-track    { background: #F1F4F7; }
+::-webkit-scrollbar-thumb    { background: #CBD5E1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #4C6E91; }
 
 /* ── Mapbox overrides ───────────────────────────────── */
 .mapboxgl-popup-content {
-  background: #2F3E4F !important;
-  color: #F2F5F7 !important;
-  border: 1px solid rgba(76,110,145,0.5) !important;
-  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  color: #0F1823 !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 4px !important;
   padding: 14px 18px !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
   font-family: 'IBM Plex Sans', system-ui !important;
   font-size: 13px !important;
   min-width: 200px;
@@ -83,23 +83,23 @@ body {
   user-select: none; touch-action: none; width: 100%; height: 24px;
 }
 [data-radix-slider-track] {
-  background-color: #2F3E4F; position: relative;
+  background-color: #E2E8F0; position: relative;
   flex-grow: 1; border-radius: 9999px; height: 4px;
 }
 [data-radix-slider-range] {
-  position: absolute; background-color: #B23A2B;
+  position: absolute; background-color: #4C6E91;
   border-radius: 9999px; height: 100%;
 }
 [data-radix-slider-thumb] {
   display: block; width: 18px; height: 18px;
-  background-color: #F2F5F7; border: 2px solid #B23A2B;
+  background-color: #FFFFFF; border: 2px solid #4C6E91;
   border-radius: 50%; cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 [data-radix-slider-thumb]:hover  { transform: scale(1.2); }
 [data-radix-slider-thumb]:focus  {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(178,58,43,0.4);
+  box-shadow: 0 0 0 3px rgba(76,110,145,0.35);
 }
 
 /* ── Print ──────────────────────────────────────────── */

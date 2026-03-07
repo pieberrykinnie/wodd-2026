@@ -190,10 +190,12 @@ export interface ZoneSummary {
   description: string;
   persona: string;
   persona_label: string;
+  category: "office" | "neighborhood" | "lifestyle";
   lat: number;
   lng: number;
   highlights: string[];
   office_vibe: string;
+  neighbourhood_names?: string[];
   avg_property_value?: number;
   active_business_count?: number;
   transit_stop_count?: number;
@@ -418,6 +420,29 @@ export async function fetchDiscoveryWeekend(
 export async function fetchDataOverview(): Promise<DataOverviewResponse | null> {
   try {
     return await apiFetch<DataOverviewResponse>("/api/data/overview");
+  } catch {
+    return null;
+  }
+}
+
+export interface HeatmapPoint {
+  lat: number;
+  lng: number;
+  name: string;
+  weight: number;
+  business_count?: number;
+  property_value?: number;
+  permit_value?: number;
+}
+
+export interface HeatmapDataResponse {
+  points: HeatmapPoint[];
+  signal_max: { business: number; property: number; permit: number };
+}
+
+export async function fetchHeatmapData(): Promise<HeatmapDataResponse | null> {
+  try {
+    return await apiFetch<HeatmapDataResponse>("/api/zones/heatmap");
   } catch {
     return null;
   }

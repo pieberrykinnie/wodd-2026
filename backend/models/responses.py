@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -65,10 +67,12 @@ class ZoneSummary(BaseModel):
     description: str
     persona: str
     persona_label: str
+    category: str = "office"  # office | neighborhood | lifestyle
     lat: float
     lng: float
     highlights: list[str]
     office_vibe: str
+    neighbourhood_names: list[str] = []
     avg_property_value: float | None = None
     active_business_count: int | None = None
     transit_stop_count: int | None = None
@@ -83,6 +87,30 @@ class ZoneDetail(ZoneSummary):
 
 class ZonesListResponse(BaseModel):
     zones: list[ZoneSummary]
+
+
+# --- Heatmap ---
+
+
+class HeatmapPoint(BaseModel):
+    lat: float
+    lng: float
+    name: str
+    weight: float  # normalised composite 0.0–1.0
+    business_count: float | None = None  # normalised 0.0–1.0
+    property_value: float | None = None  # normalised 0.0–1.0
+    permit_value: float | None = None  # normalised 0.0–1.0
+
+
+class SignalMax(BaseModel):
+    business: float
+    property: float
+    permit: float
+
+
+class HeatmapDataResponse(BaseModel):
+    points: list[HeatmapPoint]
+    signal_max: SignalMax
 
 
 # --- Impact Calculator ---
@@ -172,3 +200,13 @@ class DataOverviewResponse(BaseModel):
     total_active_businesses: int
     total_permits_ytd: int
     sources: list[DataSource]
+
+
+# --- Onboarding Parsing ---
+
+
+class ParsedCompanyData(BaseModel):
+    company_name: Optional[str] = None
+    city: Optional[str] = None
+    industry: Optional[str] = None
+    headcount: Optional[int] = None

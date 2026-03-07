@@ -1,10 +1,6 @@
-from typing import Literal
+from pydantic import BaseModel, Field, HttpUrl
 
-from pydantic import BaseModel, Field
-
-SUPPORTED_CITIES = Literal[
-    "toronto", "vancouver", "montreal", "calgary", "ottawa"
-]
+SUPPORTED_CITIES = ["toronto", "vancouver", "montreal", "calgary", "ottawa"]
 
 
 class CompanyInput(BaseModel):
@@ -14,7 +10,7 @@ class CompanyInput(BaseModel):
         max_length=200,
         examples=["Acme Corp"],
     )
-    current_city: SUPPORTED_CITIES = Field(
+    current_city: str = Field(
         ...,
         description="City the company is currently located in",
     )
@@ -56,6 +52,14 @@ class MigrationPlanRequest(BaseModel):
 class WelcomeGuideRequest(BaseModel):
     company: CompanyInput
     selected_zone_id: str = Field(..., examples=["exchange-district"])
+
+
+class ParseUrlRequest(BaseModel):
+    url: HttpUrl = Field(
+        ...,
+        description="HTTP/HTTPS URL of the company website to parse",
+        examples=["https://www.shopify.com/about"],
+    )
 
 
 class DiscoveryWeekendRequest(BaseModel):

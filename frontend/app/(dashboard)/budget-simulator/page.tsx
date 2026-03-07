@@ -1,470 +1,720 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
-import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { getCityById, fetchImpact, fetchZones, type ImpactResponse, type ZoneSummary } from "@/lib/api";
-import { calculateSavings, formatCurrency, commuteHoursPerYear } from "@/lib/calculations";
-import MetricTile from "@/components/ui/MetricTile";
-import PillButton from "@/components/ui/PillButton";
-import SectionHeader from "@/components/ui/SectionHeader";
-import InsightBanner from "@/components/ui/InsightBanner";
-import { Upload, FileText, X, Loader2, MapPin } from "lucide-react";
-import dynamic from "next/dynamic";
-
-const SavingsChart = dynamic(
-    () => import("@/components/charts/SavingsChart"),
-    { ssr: false }
-);
+import {
+  getCityById,
+  fetchImpact,
+  fetchZones,
+  type ImpactResponse,
+  type ZoneSummary,
+} from "@/lib/api";
+import {
+  buildFinanceRows,
+  formatValue,
+  formatDelta,
+  type FinanceRow,
+  type ValueType,
+} from "@/lib/financeTable";
+import { exportToExcel, exportToPDF, type ExportMeta } from "@/lib/exportFinance";
+import {
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  MapPin,
+  Download,
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 export default function BudgetSimulatorPage() {
-    const store = useCompanyStore();
-    const city = getCityById(store.cityId) ?? getCityById("toronto")!;
+  const store = useCompanyStore();
+  const city = getCityById(store.cityId) ?? getCityById("toronto")!;
 
-    const [employees, setEmployees] = useState(store.employees ?? 50);
-    const [avgSalary, setAvgSalary] = useState(store.avgSalary ?? 87500);
-    const [sqftPerEmployee, setSqftPerEmployee] = useState(150);
-    const [csvEmployees, setCsvEmployees] = useState<number | null>(null);
-    const [csvFile, setCsvFile] = useState<string | null>(null);
-    const [calculated, setCalculated] = useState(false);
+  const [employees, setEmployees] = useState<number>(store.employees ?? 50);
+  const [avgSalary, setAvgSalary] = useState<number>(store.avgSalary ?? 87500);
+  const [sqftPerEmployee, setSqftPerEmployee] = useState<number>(150);
+  const [selectedZone, setSelectedZone] = useState<string>(store.selectedZoneId ?? "");
+  const [zones, setZones] = useState<ZoneSummary[]>([]);
 
-    // Backend impact state
-    const [impact, setImpact] = useState<ImpactResponse | null>(null);
-    const [loadingImpact, setLoadingImpact] = useState(false);
-    const [zones, setZones] = useState<ZoneSummary[]>([]);
-    const [selectedZone, setSelectedZone] = useState<string>(store.selectedZoneId ?? "");
+  const [csvEmployees, setCsvEmployees] = useState<number | null>(null);
+  const [csvFile, setCsvFile] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchZones().then((z) => {
-            setZones(z);
-            // If store already has a zone selected, pre-fill it
-            if (!selectedZone && store.selectedZoneId) setSelectedZone(store.selectedZoneId);
-            else if (!selectedZone && z.length > 0) setSelectedZone(z[0].id);
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+  const [impact, setImpact] = useState<ImpactResponse | null>(null);
+  const [loadingImpact, setLoadingImpact] = useState(false);
+  const [calculated, setCalculated] = useState(false);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const tableRef = useRef<HTMLDivElement>(null);
 
-    const effectiveEmployees = csvEmployees ?? employees;
-
-    const result = calculateSavings({
-        employees: effectiveEmployees,
-        avgSalary,
-        sqftPerEmployee,
-        currentOfficeRent: city.officeSqft,
-        currentHomePrice: city.homePrice,
-        cityTaxRate: city.taxRate,
+  useEffect(() => {
+    fetchZones().then((z) => {
+      setZones(z);
+      if (!selectedZone && store.selectedZoneId) setSelectedZone(store.selectedZoneId);
+      else if (!selectedZone && z.length > 0) setSelectedZone(z[0].id);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    const commuteHrs = commuteHoursPerYear(city.avgCommute) * effectiveEmployees;
+  const effectiveEmployees = csvEmployees ?? employees;
 
-    // CSV drop handler
-    const onDrop = useCallback((files: File[]) => {
-        const file = files[0];
-        if (!file) return;
-        setCsvFile(file.name);
-        Papa.parse<Record<string, string>>(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (res) => {
-                setCsvEmployees(res.data.length);
-            },
-        });
-    }, []);
+  const rows: FinanceRow[] = buildFinanceRows(
+    { employees: effectiveEmployees, avgSalary, sqftPerEmployee },
+    city,
+    calculated ? impact : null,
+  );
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
-        accept: { "text/csv": [".csv"], "application/vnd.ms-excel": [".csv"] },
-        maxFiles: 1,
+  const onDrop = useCallback((files: File[]) => {
+    const file = files[0];
+    if (!file) return;
+    setCsvFile(file.name);
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => setCsvEmployees(res.data.length),
     });
+  }, []);
 
-    // SALARY_BAND_MAP
-    const SALARY_SLICES = [40000, 62500, 87500, 125000, 175000];
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "text/csv": [".csv"], "application/vnd.ms-excel": [".csv"] },
+    maxFiles: 1,
+  });
 
-    const handleCalculate = async () => {
-        setCalculated(true);
-        setLoadingImpact(true);
-        const result = await fetchImpact(
-            store.companyName || "Your Company",
-            store.cityId,
-            effectiveEmployees,
-            avgSalary,
-            selectedZone || "exchange-district",
-            sqftPerEmployee
-        );
-        setImpact(result);
-        setLoadingImpact(false);
-    };
-
-    return (
-        <div className="p-6 md:p-8 flex flex-col gap-6">
-            <SectionHeader
-                eyebrow="Budget Simulator"
-                title="Calculate Your Savings"
-                subtitle="Adjust the parameters to model your specific relocation scenario."
-            />
-
-            <TabsPrimitive.Root defaultValue="interactive" className="flex flex-col gap-6">
-                {/* Tab triggers */}
-                <TabsPrimitive.List className="flex gap-1 bg-river-slate/50 p-1 rounded-xl w-fit">
-                    {[
-                        { value: "interactive", label: "Interactive Sliders" },
-                        { value: "csv", label: "CSV Import" },
-                    ].map((t) => (
-                        <TabsPrimitive.Trigger
-                            key={t.value}
-                            value={t.value}
-                            className="px-5 py-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-exchange-brick data-[state=active]:text-white data-[state=inactive]:text-concrete-gray data-[state=inactive]:hover:text-frost-white"
-                            style={{ fontFamily: "var(--font-ibm-sans)" }}
-                        >
-                            {t.label}
-                        </TabsPrimitive.Trigger>
-                    ))}
-                </TabsPrimitive.List>
-
-                {/* Interactive tab */}
-                <TabsPrimitive.Content value="interactive" className="outline-none">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-6">
-                            <SliderField
-                                label="Employees Relocating"
-                                value={employees}
-                                min={5}
-                                max={500}
-                                step={5}
-                                format={(v) => `${v} people`}
-                                onChange={setEmployees}
-                            />
-                            <SliderField
-                                label="Average Annual Salary"
-                                value={avgSalary}
-                                min={40000}
-                                max={200000}
-                                step={2500}
-                                format={(v) => formatCurrency(v, true)}
-                                markers={SALARY_SLICES}
-                                onChange={setAvgSalary}
-                            />
-                            <SliderField
-                                label="Office Space per Employee"
-                                value={sqftPerEmployee}
-                                min={50}
-                                max={300}
-                                step={10}
-                                format={(v) => `${v} sqft/person`}
-                                onChange={setSqftPerEmployee}
-                            />
-                            {zones.length > 0 && (
-                                <div>
-                                    <label
-                                        className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider text-concrete-gray mb-2"
-                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                    >
-                                        <MapPin size={12} />
-                                        Winnipeg Zone
-                                    </label>
-                                    <select
-                                        value={selectedZone}
-                                        onChange={(e) => setSelectedZone(e.target.value)}
-                                        className="w-full rounded-lg px-3 py-2 text-sm text-frost-white border border-white/10 outline-none"
-                                        style={{
-                                            background: "rgba(47,62,79,0.8)",
-                                            fontFamily: "var(--font-ibm-sans)",
-                                        }}
-                                    >
-                                        {zones.map((z) => (
-                                            <option key={z.id} value={z.id}>
-                                                {z.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                            <div className="pt-2">
-                                <PillButton onClick={handleCalculate} icon>
-                                    Calculate My Savings
-                                </PillButton>
-                            </div>
-                        </div>
-
-                        {/* Live preview */}
-                        <div className="bg-river-slate/50 rounded-xl p-5 border border-white/5 space-y-3">
-                            <p
-                                className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold"
-                                style={{ fontFamily: "var(--font-ibm-sans)" }}
-                            >
-                                Live Projection
-                            </p>
-                            <LiveRow label="Total Sqft" value={`${(sqftPerEmployee * employees).toLocaleString()} sqft`} />
-                            <LiveRow
-                                label={`Current Rent (${city.name})`}
-                                value={formatCurrency(sqftPerEmployee * employees * city.officeSqft * 12)}
-                                color="#8B98A5"
-                            />
-                            <LiveRow
-                                label="Winnipeg Rent"
-                                value={formatCurrency(sqftPerEmployee * employees * 16 * 12)}
-                                color="#5E8C6A"
-                            />
-                            <div className="h-px bg-white/8 my-2" />
-                            <LiveRow
-                                label="Annual Office Savings"
-                                value={formatCurrency(result.annualOfficeSavings)}
-                                color="#C8A44D"
-                                large
-                            />
-                            <LiveRow
-                                label="Tax Savings per Employee/yr"
-                                value={formatCurrency(result.employeeDisposableIncrease)}
-                                color="#C8A44D"
-                            />
-                        </div>
-                    </div>
-                </TabsPrimitive.Content>
-
-                {/* CSV tab */}
-                <TabsPrimitive.Content value="csv" className="outline-none">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div
-                                {...getRootProps()}
-                                className={[
-                                    "border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer",
-                                    isDragActive
-                                        ? "border-exchange-brick bg-exchange-brick/10"
-                                        : "border-white/15 hover:border-cool-blue/50 hover:bg-river-slate/30",
-                                ].join(" ")}
-                            >
-                                <input {...getInputProps()} />
-                                {csvFile ? (
-                                    <div className="flex items-center justify-center gap-3">
-                                        <FileText size={20} className="text-lake-green" />
-                                        <span className="text-frost-white text-sm" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                                            {csvFile}
-                                        </span>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setCsvFile(null);
-                                                setCsvEmployees(null);
-                                            }}
-                                            className="text-concrete-gray hover:text-exchange-brick"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <Upload size={28} className="mx-auto text-concrete-gray mb-3" />
-                                        <p className="text-sm text-frost-white font-medium mb-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                                            {isDragActive ? "Drop your CSV here" : "Drop your employee CSV"}
-                                        </p>
-                                        <p className="text-xs text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                                            Each row = one employee. Headers: name, salary, department
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-
-                            {csvEmployees !== null && (
-                                <InsightBanner variant="tip">
-                                    Parsed <strong style={{ color: "#4C6E91" }}>{csvEmployees} employees</strong> from CSV.
-                                    Calculations below reflect your full workforce.
-                                </InsightBanner>
-                            )}
-
-                            <PillButton onClick={handleCalculate} icon>
-                                Calculate My Savings
-                            </PillButton>
-                        </div>
-
-                        <div className="bg-river-slate/50 rounded-xl p-5 border border-white/5">
-                            <p className="text-xs text-concrete-gray mb-3" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                                Expected CSV format:
-                            </p>
-                            <pre
-                                className="text-[12px] text-lake-green leading-relaxed"
-                                style={{ fontFamily: "var(--font-ibm-mono)" }}
-                            >
-                                {`name,salary,department
-Jane Smith,95000,Engineering
-John Doe,82000,Marketing
-...`}
-                            </pre>
-                        </div>
-                    </div>
-                </TabsPrimitive.Content>
-            </TabsPrimitive.Root>
-
-            {/* Results */}
-            {calculated && (
-                <>
-                    <div className="h-px bg-white/8" />
-
-                    {loadingImpact && (
-                        <div className="flex items-center gap-2 text-concrete-gray text-sm" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                            <Loader2 size={15} className="animate-spin" />
-                            Fetching live impact data…
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <MetricTile
-                            label="Annual Office Savings"
-                            value={formatCurrency(impact?.annual_office_savings ?? result.annualOfficeSavings, true)}
-                            sub="Rent delta vs Winnipeg"
-                            accent="brick"
-                        />
-                        <MetricTile
-                            label="Employee Disposable +"
-                            value={formatCurrency(
-                                impact
-                                    ? impact.per_employee_disposable_income_gain * effectiveEmployees
-                                    : result.totalEmployeeDisposableIncrease,
-                                true
-                            )}
-                            sub={`${formatCurrency(impact?.per_employee_disposable_income_gain ?? result.employeeDisposableIncrease, true)}/person/yr`}
-                            accent="gold"
-                        />
-                        <MetricTile
-                            label="Housing Equity Gain"
-                            value={formatCurrency(result.housingEquityGain, true)}
-                            sub="Per employee, avg home vs avg home"
-                            accent="green"
-                        />
-                        <MetricTile
-                            label="Commute Hours Recovered"
-                            value={`${commuteHrs.toLocaleString()} hrs`}
-                            sub={`${Math.round(commuteHrs / effectiveEmployees)} hrs/employee/yr`}
-                            accent="blue"
-                        />
-                    </div>
-
-                    <div className="h-52">
-                        <SavingsChart
-                            officeSavings={impact?.annual_office_savings ?? result.annualOfficeSavings}
-                            disposableIncrease={
-                                impact
-                                    ? impact.per_employee_disposable_income_gain * effectiveEmployees
-                                    : result.totalEmployeeDisposableIncrease
-                            }
-                            housingEquity={result.housingEquityGain}
-                        />
-                    </div>
-
-                    {impact && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <MetricTile
-                                label="5-Year Total Projection"
-                                value={formatCurrency(impact.five_year_projection, true)}
-                                sub="Combined company + employee benefit"
-                                accent="gold"
-                            />
-                            <MetricTile
-                                label="Retention Risk Without Move"
-                                value={`${impact.retention_risk_without_lifestyle}%`}
-                                sub="Estimated annual turnover risk"
-                                accent="brick"
-                            />
-                            <MetricTile
-                                label="Retention Risk With Winnipeg"
-                                value={`${impact.retention_risk_with_lifestyle}%`}
-                                sub={`${impact.retention_risk_without_lifestyle - impact.retention_risk_with_lifestyle}% improvement`}
-                                deltaPositive
-                                accent="green"
-                            />
-                        </div>
-                    )}
-
-                    <InsightBanner variant="highlight">
-                        Over 5 years, this relocation generates approximately{" "}
-                        <strong style={{ color: "#C8A44D" }}>
-                            {formatCurrency((impact?.total_annual_savings ?? result.totalSavings) * 5, true)}
-                        </strong>{" "}
-                        in combined company + employee financial benefit — before considering recruitment advantages
-                        and talent retention from improved quality of life.
-                    </InsightBanner>
-                </>
-            )}
-        </div>
+  const handleCalculate = async () => {
+    setCalculated(true);
+    setLoadingImpact(true);
+    store.setSelectedZoneId(selectedZone);
+    const result = await fetchImpact(
+      store.companyName || "Your Company",
+      store.cityId,
+      effectiveEmployees,
+      avgSalary,
+      selectedZone || "exchange-district",
+      sqftPerEmployee,
     );
-}
+    setImpact(result);
+    setLoadingImpact(false);
+    setTimeout(
+      () => tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      100,
+    );
+  };
 
-function SliderField({
-    label,
-    value,
-    min,
-    max,
-    step,
-    format,
-    markers,
-    onChange,
-}: {
-    label: string;
-    value: number;
-    min: number;
-    max: number;
-    step: number;
-    format: (v: number) => string;
-    markers?: number[];
-    onChange: (v: number) => void;
-}) {
-    return (
-        <div>
-            <div className="flex justify-between items-center mb-3">
-                <label
-                    className="text-[12px] font-semibold uppercase tracking-wider text-concrete-gray"
+  const toggleCollapse = (id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const exportMeta: ExportMeta = {
+    companyName: store.companyName || "Your Company",
+    currentCityName: city.name,
+    generatedDate: new Date().toLocaleDateString("en-CA", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    employees: effectiveEmployees,
+    avgSalary,
+  };
+
+  return (
+    <div className="p-6 md:p-8 flex flex-col gap-0">
+      <div className="mb-7">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-widest mb-1"
+          style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
+        >
+          Budget Simulator
+        </p>
+        <h1
+          className="text-2xl font-bold leading-tight mb-1"
+          style={{ color: "#0F1823", fontFamily: "var(--font-ibm-sans)" }}
+        >
+          Relocation Financial Analysis
+        </h1>
+        <p className="text-sm" style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}>
+          Finance-grade line-item breakdown across six cost categories &mdash;{" "}
+          <span style={{ color: "#4C6E91" }}>{city.name}</span> &rarr; Winnipeg, MB
+        </p>
+      </div>
+
+      <div
+        className="rounded-xl border mb-6"
+        style={{ background: "rgba(241,244,247,0.9)", borderColor: "rgba(0,0,0,0.1)" }}
+      >
+        <div className="p-5 border-b" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
+          <TabsPrimitive.Root defaultValue="inputs" className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <TabsPrimitive.List
+                className="flex gap-1 p-1 rounded-lg w-fit"
+                style={{ background: "rgba(241,244,247,0.5)" }}
+              >
+                {[
+                  { value: "inputs", label: "Manual Inputs" },
+                  { value: "csv", label: "CSV Import" },
+                ].map((t) => (
+                  <TabsPrimitive.Trigger
+                    key={t.value}
+                    value={t.value}
+                    className="px-4 py-1.5 rounded-md text-xs font-medium transition-all data-[state=active]:bg-[#4C6E91] data-[state=active]:text-white data-[state=inactive]:text-[#8B98A5]"
                     style={{ fontFamily: "var(--font-ibm-sans)" }}
+                  >
+                    {t.label}
+                  </TabsPrimitive.Trigger>
+                ))}
+              </TabsPrimitive.List>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => exportToExcel(rows, exportMeta)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                  style={{
+                    background: "rgba(94,140,106,0.15)",
+                    color: "#5E8C6A",
+                    border: "1px solid rgba(94,140,106,0.3)",
+                    fontFamily: "var(--font-ibm-sans)",
+                  }}
                 >
-                    {label}
-                </label>
-                <span
-                    className="text-sm font-semibold text-prairie-gold"
-                    style={{ fontFamily: "var(--font-ibm-mono)" }}
+                  <FileSpreadsheet size={13} />
+                  Export Excel
+                </button>
+                <button
+                  onClick={() => exportToPDF(rows, exportMeta)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                  style={{
+                    background: "rgba(185,148,69,0.12)",
+                    color: "#4C6E91",
+                    border: "1px solid rgba(185,148,69,0.25)",
+                    fontFamily: "var(--font-ibm-sans)",
+                  }}
                 >
-                    {format(value)}
-                </span>
+                  <Download size={13} />
+                  Export PDF
+                </button>
+              </div>
             </div>
-            <SliderPrimitive.Root
-                min={min}
-                max={max}
-                step={step}
-                value={[value]}
-                onValueChange={([v]) => onChange(v)}
-            >
-                <SliderPrimitive.Track>
-                    <SliderPrimitive.Range />
-                </SliderPrimitive.Track>
-                <SliderPrimitive.Thumb aria-label={label} />
-            </SliderPrimitive.Root>
+
+            <TabsPrimitive.Content value="inputs" className="outline-none">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                <NumericField
+                  label="Employees Relocating"
+                  value={employees}
+                  min={1}
+                  max={10000}
+                  unit="people"
+                  onChange={setEmployees}
+                />
+                <NumericField
+                  label="Avg Annual Salary"
+                  value={avgSalary}
+                  min={30000}
+                  max={500000}
+                  unit="CAD"
+                  prefix="$"
+                  onChange={setAvgSalary}
+                />
+                <NumericField
+                  label="Office Sqft / Employee"
+                  value={sqftPerEmployee}
+                  min={50}
+                  max={500}
+                  unit="sqft"
+                  onChange={setSqftPerEmployee}
+                />
+                <div>
+                  <label
+                    className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider mb-2 block"
+                    style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
+                  >
+                    <MapPin size={11} />
+                    Winnipeg Zone
+                  </label>
+                  <select
+                    value={selectedZone}
+                    onChange={(e) => setSelectedZone(e.target.value)}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{
+                      background: "rgba(241,244,247,0.8)",
+                      color: "#0F1823",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      fontFamily: "var(--font-ibm-sans)",
+                    }}
+                  >
+                    {zones.map((z) => (
+                      <option key={z.id} value={z.id}>
+                        {z.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </TabsPrimitive.Content>
+
+            <TabsPrimitive.Content value="csv" className="outline-none">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <div
+                  {...getRootProps()}
+                  className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all"
+                  style={{
+                    borderColor: isDragActive ? "#4C6E91" : "rgba(0,0,0,0.15)",
+                    background: isDragActive ? "rgba(185,148,69,0.08)" : "rgba(241,244,247,0.3)",
+                  }}
+                >
+                  <input {...getInputProps()} />
+                  {csvFile ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <FileText size={18} style={{ color: "#5E8C6A" }} />
+                      <span className="text-sm" style={{ color: "#0F1823", fontFamily: "var(--font-ibm-sans)" }}>
+                        {csvFile}
+                        {csvEmployees !== null && (
+                          <span style={{ color: "#4C6E91" }}> &middot; {csvEmployees} employees</span>
+                        )}
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setCsvFile(null); setCsvEmployees(null); }}
+                        style={{ color: "#8B98A5" }}
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={24} className="mx-auto mb-2" style={{ color: "#8B98A5" }} />
+                      <p className="text-sm font-medium mb-0.5" style={{ color: "#0F1823", fontFamily: "var(--font-ibm-sans)" }}>
+                        {isDragActive ? "Drop your CSV here" : "Drop employee CSV"}
+                      </p>
+                      <p className="text-xs" style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}>
+                        Headers: name, salary, department
+                      </p>
+                    </>
+                  )}
+                </div>
+                <div
+                  className="rounded-lg p-4"
+                  style={{ background: "rgba(241,244,247,0.3)", border: "1px solid rgba(0,0,0,0.1)" }}
+                >
+                  <p className="text-xs mb-2" style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}>
+                    Expected CSV format:
+                  </p>
+                  <pre className="text-xs leading-relaxed" style={{ color: "#5E8C6A", fontFamily: "var(--font-ibm-mono)" }}>
+                    {"name,salary,department\nJane Smith,95000,Engineering\nJohn Doe,82000,Marketing"}
+                  </pre>
+                </div>
+              </div>
+            </TabsPrimitive.Content>
+          </TabsPrimitive.Root>
         </div>
-    );
+
+        <div
+          className="px-5 py-3 flex items-center justify-between gap-4"
+          style={{ background: "#F1F4F7" }}
+        >
+          <p className="text-xs" style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}>
+            <span style={{ color: "#0F1823" }}>{effectiveEmployees.toLocaleString()}</span> employees &middot;{" "}
+            <span style={{ color: "#0F1823" }}>${avgSalary.toLocaleString()}</span> avg salary &middot;{" "}
+            <span style={{ color: "#0F1823" }}>{sqftPerEmployee}</span> sqft/person &middot;{" "}
+            <span style={{ color: "#4C6E91" }}>{city.name}</span> &rarr; Winnipeg
+          </p>
+          <button
+            onClick={handleCalculate}
+            disabled={loadingImpact}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{
+              background: "#4C6E91",
+              color: "#F1F4F7",
+              opacity: loadingImpact ? 0.6 : 1,
+              fontFamily: "var(--font-ibm-sans)",
+            }}
+          >
+            {loadingImpact ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Calculating...
+              </>
+            ) : (
+              "Run Full Analysis"
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div ref={tableRef}>
+        <FinanceTable
+          rows={rows}
+          cityName={city.name}
+          collapsed={collapsed}
+          onToggle={toggleCollapse}
+          calculated={calculated}
+          loading={loadingImpact}
+        />
+      </div>
+
+      <p
+        className="mt-4 text-[10.5px] leading-relaxed"
+        style={{ color: "#4A5664", fontFamily: "var(--font-ibm-sans)" }}
+      >
+        * MEDITC shown as estimated benefit where applicable (Province of Manitoba Digital Media Tax Credit).
+        All figures in CAD. Sources: Statistics Canada, CBRE 2025 Office Market Report, CREA 2025, JLL 2024, SHRM 2024.
+      </p>
+    </div>
+  );
 }
 
-function LiveRow({
-    label,
-    value,
-    color = "#F2F5F7",
-    large = false,
+function FinanceTable({
+  rows,
+  cityName,
+  collapsed,
+  onToggle,
+  calculated,
+  loading,
 }: {
-    label: string;
-    value: string;
-    color?: string;
-    large?: boolean;
+  rows: FinanceRow[];
+  cityName: string;
+  collapsed: Set<string>;
+  onToggle: (id: string) => void;
+  calculated: boolean;
+  loading: boolean;
 }) {
-    return (
-        <div className="flex justify-between items-center">
-            <span className="text-[13px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
-                {label}
+  let currentHeaderId = "";
+  const renderedRows: React.ReactNode[] = [];
+
+  for (const row of rows) {
+    if (row.kind === "header") {
+      currentHeaderId = row.id;
+      renderedRows.push(
+        <CategoryHeaderRow
+          key={row.id}
+          row={row}
+          isCollapsed={collapsed.has(row.id)}
+          onToggle={() => onToggle(row.id)}
+        />,
+      );
+      continue;
+    }
+    if (collapsed.has(currentHeaderId)) continue;
+
+    if (row.kind === "subtotal") {
+      renderedRows.push(<SubtotalRow key={row.id} row={row} />);
+    } else if (row.kind === "summary") {
+      renderedRows.push(
+        <SummaryRow key={row.id} row={row} calculated={calculated} loading={loading} />,
+      );
+    } else {
+      renderedRows.push(
+        <DataRow key={row.id} row={row} cityName={cityName} calculated={calculated} loading={loading} />,
+      );
+    }
+  }
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.1)" }}>
+      <table className="w-full border-collapse" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+        <thead>
+          <tr style={{ background: "#F1F4F7" }}>
+            {([
+              { label: "Line Item", align: "left" as const, w: "35%", gold: true },
+              { label: cityName, align: "right" as const, w: "13%" },
+              { label: "Winnipeg", align: "right" as const, w: "13%" },
+              { label: "Delta", align: "right" as const, w: "12%" },
+              { label: "Chg %", align: "right" as const, w: "8%" },
+              { label: "Notes", align: "left" as const, w: "auto", hide: true },
+            ]).map((col) => (
+              <th
+                key={col.label}
+                className={"px-4 py-3 text-[10.5px] font-semibold uppercase tracking-wider" + (col.hide ? " hidden md:table-cell" : "")}
+                style={{
+                  color: col.gold ? "#4C6E91" : "#8B98A5",
+                  textAlign: col.align,
+                  width: col.w,
+                  borderBottom: "1px solid rgba(185,148,69,0.2)",
+                }}
+              >
+                {col.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{renderedRows}</tbody>
+      </table>
+    </div>
+  );
+}
+
+function CategoryHeaderRow({
+  row,
+  isCollapsed,
+  onToggle,
+}: {
+  row: FinanceRow;
+  isCollapsed: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <tr
+      onClick={onToggle}
+      className="cursor-pointer select-none"
+      style={{
+        background: "#F7F9FB",
+        borderTop: "1px solid rgba(185,148,69,0.2)",
+        borderBottom: "1px solid rgba(185,148,69,0.12)",
+      }}
+    >
+      <td colSpan={6} className="px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          {isCollapsed ? (
+            <ChevronDown size={13} style={{ color: "#4C6E91" }} />
+          ) : (
+            <ChevronUp size={13} style={{ color: "#4C6E91" }} />
+          )}
+          <span
+            className="text-[11px] font-bold uppercase tracking-widest"
+            style={{ color: "#4C6E91" }}
+          >
+            {row.label}
+          </span>
+          {row.notes && (
+            <span className="text-[10px] ml-2 hidden md:inline" style={{ color: "#4A5664" }}>
+              {row.notes}
             </span>
-            <span
-                className={large ? "text-lg font-semibold" : "text-[13px]"}
-                style={{ fontFamily: "var(--font-ibm-mono)", color }}
-            >
-                {value}
-            </span>
+          )}
         </div>
-    );
+      </td>
+    </tr>
+  );
+}
+
+function DataRow({
+  row,
+  cityName,
+  calculated,
+  loading,
+}: {
+  row: FinanceRow;
+  cityName: string;
+  calculated: boolean;
+  loading: boolean;
+}) {
+  void cityName;
+  const isBackendRow =
+    row.notes.includes("impact model") || row.notes.includes("Via impact model");
+  const showPending = isBackendRow && !calculated;
+  const showLoading = isBackendRow && calculated && loading;
+
+  return (
+    <tr
+      className="transition-colors hover:bg-gray-50"
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}
+    >
+      <td className="px-4 py-2.5 pl-8 text-[12.5px]" style={{ color: "#0F1823" }}>
+        {row.label}
+      </td>
+      <MonoCell value={row.currentCity} type={row.valueType} muted />
+      <MonoCell value={row.winnipeg} type={row.valueType} muted />
+      <td
+        className="text-right px-4 py-2.5 text-[12.5px]"
+        style={{ color: getDeltaColor(row.delta, row.highlight), fontFamily: "var(--font-ibm-mono)" }}
+      >
+        {showPending ? (
+          <span className="text-[11px]" style={{ color: "#4A5664", fontStyle: "italic" }}>{"—"}</span>
+        ) : showLoading ? (
+          <Loader2 size={11} className="inline animate-spin" style={{ color: "#5E6B78" }} />
+        ) : (
+          formatDelta(row.delta, row.valueType)
+        )}
+      </td>
+      <td
+        className="text-right px-4 py-2.5 text-[11.5px]"
+        style={{ color: "#4A5664", fontFamily: "var(--font-ibm-mono)" }}
+      >
+        {row.pct !== null ? (row.pct > 0 ? "+" : "") + row.pct.toFixed(1) + "%" : "—"}
+      </td>
+      <td className="px-4 py-2.5 text-[10.5px] hidden md:table-cell" style={{ color: "#4A5664" }}>
+        {row.notes}
+      </td>
+    </tr>
+  );
+}
+
+function SubtotalRow({ row }: { row: FinanceRow }) {
+  return (
+    <tr
+      style={{
+        background: "#F7F9FB",
+        borderTop: "1px solid rgba(185,148,69,0.2)",
+        borderBottom: "1px solid rgba(0,0,0,0.07)",
+      }}
+    >
+      <td
+        colSpan={3}
+        className="px-4 pl-8 py-2.5 text-[12px] font-semibold"
+        style={{ color: "#0F1823" }}
+      >
+        {row.label}
+      </td>
+      <td
+        className="text-right px-4 py-2.5 text-[13px] font-semibold"
+        style={{ color: getDeltaColor(row.delta, row.highlight), fontFamily: "var(--font-ibm-mono)" }}
+      >
+        {formatDelta(row.delta, row.valueType)}
+      </td>
+      <td className="px-4 py-2.5" />
+      <td className="px-4 py-2.5 text-[10.5px] hidden md:table-cell" style={{ color: "#4A5664" }}>
+        {row.notes}
+      </td>
+    </tr>
+  );
+}
+
+function SummaryRow({
+  row,
+  calculated,
+  loading,
+}: {
+  row: FinanceRow;
+  calculated: boolean;
+  loading: boolean;
+}) {
+  const isTopLine =
+    row.id === "fs-total-annual" || row.id === "fs-5yr-net" || row.id === "fs-roi";
+
+  return (
+    <tr
+      style={{
+        background: isTopLine ? "rgba(185,148,69,0.07)" : "rgba(241,244,247,0.9)",
+        borderTop: isTopLine
+          ? "1px solid rgba(185,148,69,0.18)"
+          : "1px solid rgba(0,0,0,0.07)",
+      }}
+    >
+      <td
+        colSpan={3}
+        className="px-4 py-3 text-[13px] font-semibold"
+        style={{ color: isTopLine ? "#0F1823" : "#4A5664" }}
+      >
+        {row.label}
+      </td>
+      <td
+        className="text-right px-4 py-3 font-bold"
+        style={{
+          fontSize: isTopLine ? "15px" : "13px",
+          color: getDeltaColor(row.delta, row.highlight),
+          fontFamily: "var(--font-ibm-mono)",
+        }}
+      >
+        {!calculated ? (
+          <span className="text-[11px]" style={{ color: "#4A5664", fontStyle: "italic" }}>
+            Run analysis
+          </span>
+        ) : loading ? (
+          <Loader2 size={13} className="inline animate-spin" style={{ color: "#5E6B78" }} />
+        ) : (
+          formatDelta(row.delta, row.valueType)
+        )}
+      </td>
+      <td className="px-4 py-3" />
+      <td className="px-4 py-3 text-[10.5px] hidden md:table-cell" style={{ color: "#4A5664" }}>
+        {row.notes}
+      </td>
+    </tr>
+  );
+}
+
+function MonoCell({
+  value,
+  type,
+  muted = false,
+}: {
+  value: number | string | null;
+  type: ValueType;
+  muted?: boolean;
+}) {
+  return (
+    <td
+      className="text-right px-4 py-2.5 text-[12.5px]"
+      style={{ color: muted ? "#64748B" : "#0F1823", fontFamily: "var(--font-ibm-mono)" }}
+    >
+      {formatValue(value, type)}
+    </td>
+  );
+}
+
+function getDeltaColor(
+  delta: number | null,
+  hint?: "green" | "gold" | "red" | "none",
+): string {
+  if (hint === "red") return "#4C6E91";
+  if (hint === "gold") return "#4C6E91";
+  if (hint === "green") return "#5E8C6A";
+  if (delta === null) return "#8B98A5";
+  if (delta > 0) return "#5E8C6A";
+  if (delta < 0) return "#4C6E91";
+  return "#8B98A5";
+}
+
+function NumericField({
+  label,
+  value,
+  min,
+  max,
+  unit,
+  prefix,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  prefix?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <label
+        className="text-[11px] font-semibold uppercase tracking-wider mb-2 block"
+        style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
+      >
+        {label}
+      </label>
+      <div className="relative">
+        {prefix && (
+          <span
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none"
+            style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-mono)" }}
+          >
+            {prefix}
+          </span>
+        )}
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value.toLocaleString()}
+          onChange={(e) => {
+            const raw = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10);
+            if (!isNaN(raw)) onChange(Math.max(min, Math.min(max, raw)));
+          }}
+          className="w-full rounded-lg py-2 text-sm outline-none"
+          style={{
+            paddingLeft: prefix ? "1.5rem" : "0.75rem",
+            paddingRight: "0.75rem",
+            background: "rgba(241,244,247,0.8)",
+            color: "#0F1823",
+            border: "1px solid rgba(0,0,0,0.12)",
+            fontFamily: "var(--font-ibm-mono)",
+          }}
+        />
+      </div>
+      <p className="text-[10px] mt-0.5" style={{ color: "#4A5664", fontFamily: "var(--font-ibm-sans)" }}>
+        {unit}
+      </p>
+    </div>
+  );
 }

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { fetchZones, type ZoneSummary } from "@/lib/api";
+import { fetchZones, fetchHeatmapData, type ZoneSummary, type HeatmapDataResponse } from "@/lib/api";
 import SectionHeader from "@/components/ui/SectionHeader";
 import PillButton from "@/components/ui/PillButton";
 import InsightBanner from "@/components/ui/InsightBanner";
@@ -12,7 +12,7 @@ import InsightBanner from "@/components/ui/InsightBanner";
 const HotspotMap = dynamic(() => import("@/components/maps/HotspotMap"), {
     ssr: false,
     loading: () => (
-        <div className="w-full h-full bg-river-slate rounded-xl flex items-center justify-center">
+        <div className="w-full h-full bg-river-slate rounded flex items-center justify-center">
             <p className="text-concrete-gray text-sm">Loading Winnipeg map…</p>
         </div>
     ),
@@ -21,9 +21,11 @@ const HotspotMap = dynamic(() => import("@/components/maps/HotspotMap"), {
 export default function HotspotMapPage() {
     const { setSelectedZoneId } = useCompanyStore();
     const [zones, setZones] = useState<ZoneSummary[]>([]);
+    const [heatmapData, setHeatmapData] = useState<HeatmapDataResponse | null>(null);
 
     useEffect(() => {
         fetchZones().then(setZones);
+        fetchHeatmapData().then(setHeatmapData);
     }, []);
 
     return (
@@ -41,17 +43,15 @@ export default function HotspotMapPage() {
 
             {/* Full map */}
             <div className="flex-1 min-h-0">
-                <HotspotMap zones={zones} onSelectZone={setSelectedZoneId} />
+                <HotspotMap zones={zones} heatmapData={heatmapData} onSelectZone={setSelectedZoneId} />
             </div>
 
             {/* Bottom stats bar */}
             <div className="flex-shrink-0">
                 <InsightBanner variant="insight">
                     {zones.length > 0
-                        ? <>Showing <strong style={{ color: "#D89C3D" }}>{zones.length} Winnipeg zones</strong> powered by live Socrata open data. Click any zone to select it for your analysis.</>
-                        : <>Winnipeg has <strong style={{ color: "#D89C3D" }}>4 primary office districts</strong> with vacancy rates between 5–11%, average rent of{" "}
-                            <strong style={{ color: "#C8A44D" }}>$16–$22/sqft/month</strong> — compared to{" "}
-                            <strong style={{ color: "#8B98A5" }}>$42–$48/sqft</strong> in Toronto and Vancouver. Class A space is available at a fraction of the cost.</>
+                        ? `${zones.length} active zones loaded — density driven by ${heatmapData?.points.length ?? 0} neighbourhoods of live Socrata data.`
+                        : "Explore Winnipeg's key districts — click any zone to select it for cost analysis."
                     }
                 </InsightBanner>
             </div>

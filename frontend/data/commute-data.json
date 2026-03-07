@@ -8,7 +8,7 @@
       "drivingCommuters": 0.48,
       "activeCommuters": 0.05,
       "workFromHome": 0.13,
-      "annualHoursLost": 250,
+      "annualHoursLost": 306,
       "stressIndex": 8.2,
       "neighborhoods": [
         { "name": "North York", "mins": 68, "mode": "Subway + bus" },
@@ -26,7 +26,7 @@
       "drivingCommuters": 0.42,
       "activeCommuters": 0.07,
       "workFromHome": 0.13,
-      "annualHoursLost": 207,
+      "annualHoursLost": 253,
       "stressIndex": 7.4,
       "neighborhoods": [
         { "name": "Surrey", "mins": 75, "mode": "SkyTrain" },
@@ -44,7 +44,7 @@
       "drivingCommuters": 0.36,
       "activeCommuters": 0.09,
       "workFromHome": 0.11,
-      "annualHoursLost": 173,
+      "annualHoursLost": 213,
       "stressIndex": 6.1,
       "neighborhoods": [
         { "name": "Laval", "mins": 60, "mode": "Metro + bus" },
@@ -62,7 +62,7 @@
       "drivingCommuters": 0.68,
       "activeCommuters": 0.08,
       "workFromHome": 0.06,
-      "annualHoursLost": 67,
+      "annualHoursLost": 82,
       "stressIndex": 3.2,
       "neighborhoods": [
         { "name": "Osborne Village", "mins": 12, "mode": "Drive or bike" },
