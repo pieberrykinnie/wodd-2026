@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { getCityById } from "@/lib/api";
+import { getCityById, fetchImpact, fetchZones, type ImpactResponse, type ZoneSummary } from "@/lib/api";
 import { calculateSavings, formatCurrency, commuteHoursPerYear } from "@/lib/calculations";
 import MetricTile from "@/components/ui/MetricTile";
 import PillButton from "@/components/ui/PillButton";
 import SectionHeader from "@/components/ui/SectionHeader";
 import InsightBanner from "@/components/ui/InsightBanner";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Loader2, MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const SavingsChart = dynamic(
@@ -30,6 +30,22 @@ export default function BudgetSimulatorPage() {
     const [csvEmployees, setCsvEmployees] = useState<number | null>(null);
     const [csvFile, setCsvFile] = useState<string | null>(null);
     const [calculated, setCalculated] = useState(false);
+
+    // Backend impact state
+    const [impact, setImpact] = useState<ImpactResponse | null>(null);
+    const [loadingImpact, setLoadingImpact] = useState(false);
+    const [zones, setZones] = useState<ZoneSummary[]>([]);
+    const [selectedZone, setSelectedZone] = useState<string>(store.selectedZoneId ?? "");
+
+    useEffect(() => {
+        fetchZones().then((z) => {
+            setZones(z);
+            // If store already has a zone selected, pre-fill it
+            if (!selectedZone && store.selectedZoneId) setSelectedZone(store.selectedZoneId);
+            else if (!selectedZone && z.length > 0) setSelectedZone(z[0].id);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const effectiveEmployees = csvEmployees ?? employees;
 
@@ -66,6 +82,21 @@ export default function BudgetSimulatorPage() {
 
     // SALARY_BAND_MAP
     const SALARY_SLICES = [40000, 62500, 87500, 125000, 175000];
+
+    const handleCalculate = async () => {
+        setCalculated(true);
+        setLoadingImpact(true);
+        const result = await fetchImpact(
+            store.companyName || "Your Company",
+            store.cityId,
+            effectiveEmployees,
+            avgSalary,
+            selectedZone || "exchange-district",
+            sqftPerEmployee
+        );
+        setImpact(result);
+        setLoadingImpact(false);
+    };
 
     return (
         <div className="p-6 md:p-8 flex flex-col gap-6">
@@ -125,8 +156,34 @@ export default function BudgetSimulatorPage() {
                                 format={(v) => `${v} sqft/person`}
                                 onChange={setSqftPerEmployee}
                             />
+                            {zones.length > 0 && (
+                                <div>
+                                    <label
+                                        className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider text-concrete-gray mb-2"
+                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                    >
+                                        <MapPin size={12} />
+                                        Winnipeg Zone
+                                    </label>
+                                    <select
+                                        value={selectedZone}
+                                        onChange={(e) => setSelectedZone(e.target.value)}
+                                        className="w-full rounded-lg px-3 py-2 text-sm text-frost-white border border-white/10 outline-none"
+                                        style={{
+                                            background: "rgba(47,62,79,0.8)",
+                                            fontFamily: "var(--font-ibm-sans)",
+                                        }}
+                                    >
+                                        {zones.map((z) => (
+                                            <option key={z.id} value={z.id}>
+                                                {z.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             <div className="pt-2">
-                                <PillButton onClick={() => setCalculated(true)} icon>
+                                <PillButton onClick={handleCalculate} icon>
                                     Calculate My Savings
                                 </PillButton>
                             </div>
@@ -218,7 +275,7 @@ export default function BudgetSimulatorPage() {
                                 </InsightBanner>
                             )}
 
-                            <PillButton onClick={() => setCalculated(true)} icon>
+                            <PillButton onClick={handleCalculate} icon>
                                 Calculate My Savings
                             </PillButton>
                         </div>
@@ -245,17 +302,30 @@ John Doe,82000,Marketing
             {calculated && (
                 <>
                     <div className="h-px bg-white/8" />
+
+                    {loadingImpact && (
+                        <div className="flex items-center gap-2 text-concrete-gray text-sm" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                            <Loader2 size={15} className="animate-spin" />
+                            Fetching live impact data…
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <MetricTile
                             label="Annual Office Savings"
-                            value={formatCurrency(result.annualOfficeSavings, true)}
+                            value={formatCurrency(impact?.annual_office_savings ?? result.annualOfficeSavings, true)}
                             sub="Rent delta vs Winnipeg"
                             accent="brick"
                         />
                         <MetricTile
                             label="Employee Disposable +"
-                            value={formatCurrency(result.totalEmployeeDisposableIncrease, true)}
-                            sub={`${formatCurrency(result.employeeDisposableIncrease, true)}/person/yr`}
+                            value={formatCurrency(
+                                impact
+                                    ? impact.per_employee_disposable_income_gain * effectiveEmployees
+                                    : result.totalEmployeeDisposableIncrease,
+                                true
+                            )}
+                            sub={`${formatCurrency(impact?.per_employee_disposable_income_gain ?? result.employeeDisposableIncrease, true)}/person/yr`}
                             accent="gold"
                         />
                         <MetricTile
@@ -274,16 +344,44 @@ John Doe,82000,Marketing
 
                     <div className="h-52">
                         <SavingsChart
-                            officeSavings={result.annualOfficeSavings}
-                            disposableIncrease={result.totalEmployeeDisposableIncrease}
+                            officeSavings={impact?.annual_office_savings ?? result.annualOfficeSavings}
+                            disposableIncrease={
+                                impact
+                                    ? impact.per_employee_disposable_income_gain * effectiveEmployees
+                                    : result.totalEmployeeDisposableIncrease
+                            }
                             housingEquity={result.housingEquityGain}
                         />
                     </div>
 
+                    {impact && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <MetricTile
+                                label="5-Year Total Projection"
+                                value={formatCurrency(impact.five_year_projection, true)}
+                                sub="Combined company + employee benefit"
+                                accent="gold"
+                            />
+                            <MetricTile
+                                label="Retention Risk Without Move"
+                                value={`${impact.retention_risk_without_lifestyle}%`}
+                                sub="Estimated annual turnover risk"
+                                accent="brick"
+                            />
+                            <MetricTile
+                                label="Retention Risk With Winnipeg"
+                                value={`${impact.retention_risk_with_lifestyle}%`}
+                                sub={`${impact.retention_risk_without_lifestyle - impact.retention_risk_with_lifestyle}% improvement`}
+                                deltaPositive
+                                accent="green"
+                            />
+                        </div>
+                    )}
+
                     <InsightBanner variant="highlight">
                         Over 5 years, this relocation generates approximately{" "}
                         <strong style={{ color: "#C8A44D" }}>
-                            {formatCurrency(result.totalSavings * 5, true)}
+                            {formatCurrency((impact?.total_annual_savings ?? result.totalSavings) * 5, true)}
                         </strong>{" "}
                         in combined company + employee financial benefit — before considering recruitment advantages
                         and talent retention from improved quality of life.
