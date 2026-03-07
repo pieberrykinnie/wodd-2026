@@ -5,8 +5,15 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import PillButton from "@/components/ui/PillButton";
 import DataCard from "@/components/ui/DataCard";
 import InsightBanner from "@/components/ui/InsightBanner";
-import { CheckCircle2, Circle, Download, Calendar, MapPin, Plane } from "lucide-react";
+import { CheckCircle2, Circle, Download, Calendar, MapPin, Plane, Sparkles, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useCompanyStore } from "@/store/useCompanyStore";
+import {
+    fetchMigrationPlan,
+    fetchWelcomeGuide,
+    type MigrationPlanResponse,
+    type WelcomeGuideResponse,
+} from "@/lib/api";
 
 const BUSINESS_PHASES = [
     {
@@ -116,6 +123,40 @@ const SEASONAL_EVENTS = [
 ];
 
 export default function MigrationBoardPage() {
+    const { companyName, cityId, employees, avgSalary, selectedZoneId } = useCompanyStore();
+
+    const [aiPlan, setAiPlan] = useState<MigrationPlanResponse | null>(null);
+    const [loadingPlan, setLoadingPlan] = useState(false);
+    const [welcomeGuide, setWelcomeGuide] = useState<WelcomeGuideResponse | null>(null);
+    const [loadingGuide, setLoadingGuide] = useState(false);
+
+    const generatePlan = async () => {
+        setLoadingPlan(true);
+        const result = await fetchMigrationPlan(
+            companyName || "Your Company",
+            cityId,
+            employees,
+            avgSalary,
+            selectedZoneId ?? "exchange-district",
+            6
+        );
+        setAiPlan(result);
+        setLoadingPlan(false);
+    };
+
+    const generateGuide = async () => {
+        setLoadingGuide(true);
+        const result = await fetchWelcomeGuide(
+            companyName || "Your Company",
+            cityId,
+            employees,
+            avgSalary,
+            selectedZoneId ?? "exchange-district"
+        );
+        setWelcomeGuide(result);
+        setLoadingGuide(false);
+    };
+
     return (
         <div className="p-6 md:p-8 flex flex-col gap-6">
             <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -154,46 +195,130 @@ export default function MigrationBoardPage() {
 
                 {/* Business Track */}
                 <TabsPrimitive.Content value="business" className="outline-none">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {BUSINESS_PHASES.map((phase) => (
-                            <DataCard key={phase.month}>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div
-                                        className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                        style={{
-                                            background: phase.color + "22",
-                                            color: phase.color,
-                                            fontFamily: "var(--font-ibm-mono)",
-                                        }}
-                                    >
-                                        {phase.month}
-                                    </div>
-                                    <h3
-                                        className="text-sm font-semibold text-frost-white"
-                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                    >
-                                        {phase.title}
-                                    </h3>
-                                </div>
-                                <ul className="space-y-2.5">
-                                    {phase.tasks.map((task) => (
-                                        <li key={task} className="flex items-start gap-2">
-                                            <div
-                                                className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
-                                                style={{ background: phase.color }}
-                                            />
-                                            <p
-                                                className="text-[13px] text-frost-white/80 leading-snug"
-                                                style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                            >
-                                                {task}
-                                            </p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </DataCard>
-                        ))}
+                    {/* AI generation */}
+                    <div className="flex items-center gap-3 mb-5">
+                        <PillButton
+                            onClick={generatePlan}
+                            variant={aiPlan ? "secondary" : "primary"}
+                            icon
+                        >
+                            {loadingPlan ? (
+                                <><Loader2 size={14} className="animate-spin" /> Generating…</>
+                            ) : (
+                                <><Sparkles size={14} /> {aiPlan ? "Regenerate AI Plan" : "Generate AI Relocation Plan"}</>
+                            )}
+                        </PillButton>
+                        {!aiPlan && !loadingPlan && (
+                            <p className="text-[12px] text-concrete-gray" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                Uses Groq LLM to build a phased plan tailored to {companyName || "your company"}.
+                            </p>
+                        )}
                     </div>
+
+                    {/* AI Plan phases */}
+                    {aiPlan && (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                {aiPlan.phases.map((phase, i) => {
+                                    const color = ["#C8A44D", "#4C6E91", "#5E8C6A", "#B23A2B"][i % 4];
+                                    return (
+                                        <DataCard key={phase.phase}>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div
+                                                    className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                                    style={{ background: color + "22", color, fontFamily: "var(--font-ibm-mono)" }}
+                                                >
+                                                    Month {phase.month_start}–{phase.month_end}
+                                                </div>
+                                                <h3 className="text-sm font-semibold text-frost-white" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                                    {phase.phase}
+                                                </h3>
+                                            </div>
+                                            <p className="text-[12px] text-concrete-gray mb-3 leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                                {phase.description}
+                                            </p>
+                                            <ul className="space-y-2">
+                                                {phase.actions.map((action) => (
+                                                    <li key={action} className="flex items-start gap-2">
+                                                        <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
+                                                        <p className="text-[12px] text-frost-white/80 leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                                            {action}
+                                                        </p>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </DataCard>
+                                    );
+                                })}
+                            </div>
+
+                            {aiPlan.risks_and_mitigations.length > 0 && (
+                                <DataCard>
+                                    <p className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-3" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                        Risks &amp; Mitigations
+                                    </p>
+                                    <div className="space-y-3">
+                                        {aiPlan.risks_and_mitigations.map((r, i) => (
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-3 border-b border-white/5 last:border-0 last:pb-0">
+                                                <div>
+                                                    <p className="text-[10px] font-semibold text-exchange-brick mb-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>RISK</p>
+                                                    <p className="text-[13px] text-frost-white leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>{r.risk}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-semibold text-lake-green mb-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>MITIGATION</p>
+                                                    <p className="text-[13px] text-frost-white/80 leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>{r.mitigation}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </DataCard>
+                            )}
+                        </>
+                    )}
+
+                    {/* Static fallback phases */}
+                    {!aiPlan && !loadingPlan && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {BUSINESS_PHASES.map((phase) => (
+                                <DataCard key={phase.month}>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div
+                                            className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                            style={{
+                                                background: phase.color + "22",
+                                                color: phase.color,
+                                                fontFamily: "var(--font-ibm-mono)",
+                                            }}
+                                        >
+                                            {phase.month}
+                                        </div>
+                                        <h3
+                                            className="text-sm font-semibold text-frost-white"
+                                            style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                        >
+                                            {phase.title}
+                                        </h3>
+                                    </div>
+                                    <ul className="space-y-2.5">
+                                        {phase.tasks.map((task) => (
+                                            <li key={task} className="flex items-start gap-2">
+                                                <div
+                                                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                                                    style={{ background: phase.color }}
+                                                />
+                                                <p
+                                                    className="text-[13px] text-frost-white/80 leading-snug"
+                                                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                                >
+                                                    {task}
+                                                </p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </DataCard>
+                            ))}
+                        </div>
+                    )}
 
                     <div className="mt-4">
                         <InsightBanner variant="insight">
@@ -207,6 +332,34 @@ export default function MigrationBoardPage() {
 
                 {/* Employee Track */}
                 <TabsPrimitive.Content value="employee" className="outline-none">
+                    {/* AI Welcome Guide */}
+                    <div className="flex items-center gap-3 mb-5">
+                        <PillButton
+                            onClick={generateGuide}
+                            variant={welcomeGuide ? "secondary" : "primary"}
+                            icon
+                        >
+                            {loadingGuide ? (
+                                <><Loader2 size={14} className="animate-spin" /> Generating…</>
+                            ) : (
+                                <><Sparkles size={14} /> {welcomeGuide ? "Regenerate Welcome Guide" : "Generate Employee Welcome Guide"}</>
+                            )}
+                        </PillButton>
+                    </div>
+
+                    {welcomeGuide && (
+                        <DataCard className="mb-5">
+                            <p className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-3" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                AI Welcome Guide — {welcomeGuide.zone_name}
+                            </p>
+                            <div
+                                className="prose prose-invert prose-sm max-w-none text-frost-white/85 leading-relaxed"
+                                style={{ fontFamily: "var(--font-ibm-sans)", fontSize: "13px" }}
+                                dangerouslySetInnerHTML={{ __html: welcomeGuide.raw_markdown.replace(/\n/g, "<br/>") }}
+                            />
+                        </DataCard>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {EMPLOYEE_CHECKLIST.map((section) => (
                             <ChecklistSection key={section.category} section={section} />

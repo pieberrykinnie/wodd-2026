@@ -5,14 +5,24 @@ import DataCard from "@/components/ui/DataCard";
 import InsightBanner from "@/components/ui/InsightBanner";
 import PillButton from "@/components/ui/PillButton";
 import Link from "next/link";
+import { useState } from "react";
+import { useCompanyStore } from "@/store/useCompanyStore";
+import { fetchDiscoveryWeekend, type DiscoveryWeekendResponse } from "@/lib/api";
 import {
     Hotel,
     UtensilsCrossed,
     Map,
     Trees,
     Music,
-    ArrowRight,
+    Sparkles,
+    Loader2,
+    Calendar,
 } from "lucide-react";
+
+const MONTHS = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+];
 
 const ITINERARY = [
     {
@@ -105,6 +115,21 @@ const WHY_VISIT = [
 ];
 
 export default function DiscoveryWeekendPage() {
+    const { selectedZoneId } = useCompanyStore();
+    const [travelMonth, setTravelMonth] = useState(new Date().getMonth() + 1);
+    const [aiItinerary, setAiItinerary] = useState<DiscoveryWeekendResponse | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const generateItinerary = async () => {
+        setLoading(true);
+        const result = await fetchDiscoveryWeekend(
+            selectedZoneId ?? "exchange-district",
+            travelMonth
+        );
+        setAiItinerary(result);
+        setLoading(false);
+    };
+
     return (
         <div className="p-6 md:p-8 flex flex-col gap-8">
             {/* Hero */}
@@ -167,6 +192,94 @@ export default function DiscoveryWeekendPage() {
                     ))}
                 </div>
             </div>
+
+            {/* AI Itinerary Generator */}
+            <DataCard>
+                <div className="flex flex-wrap items-end gap-4">
+                    <div className="flex-1 min-w-[200px]">
+                        <label
+                            className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider text-concrete-gray mb-2"
+                            style={{ fontFamily: "var(--font-ibm-sans)" }}
+                        >
+                            <Calendar size={12} /> Travel Month
+                        </label>
+                        <select
+                            value={travelMonth}
+                            onChange={(e) => setTravelMonth(Number(e.target.value))}
+                            className="w-full rounded-lg px-3 py-2 text-sm text-frost-white border border-white/10 outline-none"
+                            style={{ background: "rgba(47,62,79,0.8)", fontFamily: "var(--font-ibm-sans)" }}
+                        >
+                            {MONTHS.map((m, i) => (
+                                <option key={m} value={i + 1}>{m}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <PillButton onClick={generateItinerary} icon>
+                        {loading ? (
+                            <><Loader2 size={14} className="animate-spin" /> Generating…</>
+                        ) : (
+                            <><Sparkles size={14} /> {aiItinerary ? "Regenerate Itinerary" : "Generate Personalized Itinerary"}</>
+                        )}
+                    </PillButton>
+                    <p className="text-[12px] text-concrete-gray w-full md:w-auto" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                        AI-generated itinerary tailored to your selected zone &amp; travel month.
+                    </p>
+                </div>
+
+                {/* AI Itinerary output */}
+                {aiItinerary && (
+                    <div className="mt-6 border-t border-white/8 pt-5">
+                        <p className="text-[11px] uppercase tracking-widest text-concrete-gray font-semibold mb-4" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                            AI Itinerary — {MONTHS[aiItinerary.travel_month - 1]} · {aiItinerary.zone_name}
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            {aiItinerary.itinerary.map((day, di) => {
+                                const color = ["#B23A2B", "#4C6E91", "#5E8C6A"][di % 3];
+                                return (
+                                    <div
+                                        key={day.day}
+                                        className="rounded-lg p-4 border border-white/8"
+                                        style={{ background: color + "10" }}
+                                    >
+                                        <p className="text-[11px] font-semibold mb-3" style={{ color, fontFamily: "var(--font-ibm-mono)" }}>
+                                            {day.day}
+                                        </p>
+                                        <div className="space-y-2.5">
+                                            {day.activities.map((act, ai) => (
+                                                <div key={ai} className="flex gap-2.5">
+                                                    <span className="text-[11px] font-semibold w-20 flex-shrink-0 mt-0.5" style={{ color, fontFamily: "var(--font-ibm-mono)" }}>
+                                                        {act.time}
+                                                    </span>
+                                                    <div>
+                                                        <p className="text-[13px] text-frost-white leading-snug" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                                            {act.activity}
+                                                        </p>
+                                                        {act.location && (
+                                                            <p className="text-[11px] text-concrete-gray mt-0.5" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                                                📍 {act.location}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {aiItinerary.seasonal_events.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                <p className="text-[11px] text-concrete-gray w-full" style={{ fontFamily: "var(--font-ibm-sans)" }}>Seasonal events this month:</p>
+                                {aiItinerary.seasonal_events.map((ev) => (
+                                    <span key={ev} className="text-[11px] px-2.5 py-1 rounded-full border border-prairie-gold/30 bg-prairie-gold/10 text-prairie-gold" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                        {ev}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </DataCard>
 
             {/* Why visit */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import SectionHeader from "@/components/ui/SectionHeader";
 import DataCard from "@/components/ui/DataCard";
 import InsightBanner from "@/components/ui/InsightBanner";
-import { ExternalLink, Database, BarChart3, Building2, Globe, MapPin } from "lucide-react";
+import { ExternalLink, Database, BarChart3, Building2, Globe, MapPin, TrendingUp } from "lucide-react";
+import { fetchDataOverview, type DataOverviewResponse } from "@/lib/api";
 
 const SOURCES = [
     {
@@ -116,6 +118,14 @@ const METHODOLOGY_NOTES = [
 ];
 
 export default function DataTransparencyPage() {
+    const [overview, setOverview] = useState<DataOverviewResponse | null>(null);
+
+    useEffect(() => {
+        fetchDataOverview().then(setOverview);
+    }, []);
+
+    const latestPop = overview?.population_trend?.at(-1);
+
     return (
         <div className="p-6 md:p-8 flex flex-col gap-8">
             {/* Header */}
@@ -130,6 +140,49 @@ export default function DataTransparencyPage() {
                     cost figure, and lifestyle claim in this platform can be independently verified from the sources below.
                 </InsightBanner>
             </div>
+
+            {/* Live Socrata stats */}
+            {overview && (
+                <div>
+                    <SectionHeader eyebrow="Live Data" title="Real-Time Winnipeg Metrics" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <DataCard>
+                            <div className="flex items-center gap-3 mb-2">
+                                <Building2 size={16} className="text-electric-blue" />
+                                <span className="text-[11px] uppercase tracking-widest text-concrete-gray" style={{ fontFamily: "var(--font-ibm-mono)" }}>Active Businesses</span>
+                            </div>
+                            <p className="text-[28px] font-bold text-frost-white" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                {overview.total_active_businesses.toLocaleString()}
+                            </p>
+                            <p className="text-[11px] text-concrete-gray mt-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>Registered businesses in Winnipeg</p>
+                        </DataCard>
+
+                        <DataCard>
+                            <div className="flex items-center gap-3 mb-2">
+                                <BarChart3 size={16} className="text-electric-blue" />
+                                <span className="text-[11px] uppercase tracking-widest text-concrete-gray" style={{ fontFamily: "var(--font-ibm-mono)" }}>Permits YTD</span>
+                            </div>
+                            <p className="text-[28px] font-bold text-frost-white" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                {overview.total_permits_ytd.toLocaleString()}
+                            </p>
+                            <p className="text-[11px] text-concrete-gray mt-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>Building permits issued year-to-date</p>
+                        </DataCard>
+
+                        {latestPop && (
+                            <DataCard>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <TrendingUp size={16} className="text-electric-blue" />
+                                    <span className="text-[11px] uppercase tracking-widest text-concrete-gray" style={{ fontFamily: "var(--font-ibm-mono)" }}>Population ({latestPop.year})</span>
+                                </div>
+                                <p className="text-[28px] font-bold text-frost-white" style={{ fontFamily: "var(--font-ibm-sans)" }}>
+                                    {latestPop.population.toLocaleString()}
+                                </p>
+                                <p className="text-[11px] text-concrete-gray mt-1" style={{ fontFamily: "var(--font-ibm-sans)" }}>Latest census estimate</p>
+                            </DataCard>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Source cards grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

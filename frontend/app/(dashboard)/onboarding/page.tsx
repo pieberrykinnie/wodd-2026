@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useCompanyStore } from "@/store/useCompanyStore";
+import { fetchSupportedCities } from "@/lib/api";
 import PillButton from "@/components/ui/PillButton";
 import { Building2, Users, Briefcase, MapPin, DollarSign } from "lucide-react";
 
@@ -47,7 +48,7 @@ const SALARY_MIDPOINTS: Record<string, number> = {
     "$150K+": 175000,
 };
 
-const SUPPORTED_CITIES: { id: string; label: string }[] = [
+const SUPPORTED_CITIES_FALLBACK: { id: string; label: string }[] = [
     { id: "toronto", label: "Toronto" },
     { id: "vancouver", label: "Vancouver" },
     { id: "montreal", label: "Montréal" },
@@ -64,6 +65,16 @@ export default function OnboardingPage() {
     const router = useRouter();
     const store = useCompanyStore();
 
+    const [cities, setCities] = useState(SUPPORTED_CITIES_FALLBACK);
+
+    useEffect(() => {
+        fetchSupportedCities().then((apiCities) => {
+            if (apiCities.length > 0) {
+                setCities(apiCities.map((c) => ({ id: c.key, label: c.display_name })));
+            }
+        });
+    }, []);
+
     const [form, setForm] = useState({
         companyName: store.companyName || "",
         cityId: store.cityId || "toronto",
@@ -75,7 +86,7 @@ export default function OnboardingPage() {
     const set = (k: string, v: string | number) =>
         setForm((f) => ({ ...f, [k]: v }));
 
-    const cityName = SUPPORTED_CITIES.find((c) => c.id === form.cityId)?.label ?? "Toronto";
+    const cityName = cities.find((c) => c.id === form.cityId)?.label ?? "Toronto";
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -137,7 +148,7 @@ export default function OnboardingPage() {
                     {/* Current City */}
                     <FormGroup label="Current City" icon={<MapPin size={15} />}>
                         <div className="flex gap-2">
-                            {SUPPORTED_CITIES.map((c) => (
+                            {cities.map((c) => (
                                 <button
                                     key={c.id}
                                     type="button"

@@ -14,8 +14,10 @@ export interface CompanyProfile {
 
 interface CompanyState extends CompanyProfile {
   hasOnboarded: boolean;
+  selectedZoneId: string | null;
   setProfile: (profile: Partial<CompanyProfile>) => void;
   setHasOnboarded: (v: boolean) => void;
+  setSelectedZoneId: (id: string) => void;
   reset: () => void;
 }
 
@@ -34,9 +36,11 @@ export const useCompanyStore = create<CompanyState>()(
     (set) => ({
       ...defaults,
       hasOnboarded: false,
+      selectedZoneId: null,
       setProfile: (profile) => set((s) => ({ ...s, ...profile })),
       setHasOnboarded: (hasOnboarded) => set({ hasOnboarded }),
-      reset: () => set({ ...defaults, hasOnboarded: false }),
+      setSelectedZoneId: (selectedZoneId) => set({ selectedZoneId }),
+      reset: () => set({ ...defaults, hasOnboarded: false, selectedZoneId: null }),
     }),
     { name: "winnipeg-relocation-company" }
   )
