@@ -1,0 +1,250 @@
+"use client";
+
+import SectionHeader from "@/components/ui/SectionHeader";
+import DataCard from "@/components/ui/DataCard";
+import InsightBanner from "@/components/ui/InsightBanner";
+import { ExternalLink, Database, BarChart3, Building2, Globe, MapPin } from "lucide-react";
+
+const SOURCES = [
+    {
+        id: "stats-can-cost",
+        icon: BarChart3,
+        color: "#4C6E91",
+        title: "Statistics Canada — Cost of Living Index",
+        description: "City-level cost index data used for the core comparison engine.",
+        table: "Cat. 62-001-X",
+        url: "https://www.statcan.gc.ca",
+        metrics: ["Cost of Living Index", "Consumer Price Index by City"],
+        year: "2024",
+    },
+    {
+        id: "cbre-office",
+        icon: Building2,
+        color: "#B23A2B",
+        title: "CBRE Canada — Office Market Reports",
+        description: "Commercial office rent per sqft, vacancy rates, and absorption data.",
+        table: "Q4 2024 Canada Office Report",
+        url: "https://www.cbre.ca",
+        metrics: ["Office Rent $/sqft/mo", "Vacancy Rate %", "Class A / B Supply"],
+        year: "Q4 2024",
+    },
+    {
+        id: "crea-home",
+        icon: MapPin,
+        color: "#C8A44D",
+        title: "CREA — Canadian Real Estate Association",
+        description: "Average residential sale prices by city and Metropolitan Statistical Area.",
+        table: "CREA National Stats",
+        url: "https://www.crea.ca",
+        metrics: ["Average Home Sale Price", "Median Sale Price", "Days on Market"],
+        year: "2024 Average",
+    },
+    {
+        id: "census-commute",
+        icon: Database,
+        color: "#5E8C6A",
+        title: "Statistics Canada — Journey to Work",
+        description: "Commute times, mode share, and origin-destination data from the 2021 National Household Survey.",
+        table: "98-400-X2021079",
+        url: "https://www.statcan.gc.ca",
+        metrics: ["Average Commute Duration", "Mode Share", "Census Metropolitan Area data"],
+        year: "2021 Census",
+    },
+    {
+        id: "env-canada-sunshine",
+        icon: Globe,
+        color: "#D89C3D",
+        title: "Environment & Climate Change Canada",
+        description: "30-year sunshine hours averages and climate normals for Canadian cities.",
+        table: "Canadian Climate Normals 1991–2020",
+        url: "https://climate.weather.gc.ca",
+        metrics: ["Annual Sunshine Hours", "Climate Normals", "Temperature Averages"],
+        year: "30-yr average (1991–2020)",
+    },
+    {
+        id: "edw-winnipeg",
+        icon: Building2,
+        color: "#B23A2B",
+        title: "Economic Development Winnipeg",
+        description: "Neighbourhood profiles, business incentives, and local economic data.",
+        table: "2024 Economic Indicators",
+        url: "https://economicdevelopmentwinnipeg.com",
+        metrics: ["Neighbourhood Profiles", "Business Incentives", "Growth Sectors"],
+        year: "2024",
+    },
+    {
+        id: "mapbox",
+        icon: MapPin,
+        color: "#8B98A5",
+        title: "Mapbox GL JS",
+        description: "Interactive maps rendered via Mapbox dark-v11 base tiles.",
+        table: "Mapbox Tiling Service",
+        url: "https://www.mapbox.com",
+        metrics: ["Base Map Tiles", "Geocoding API", "Custom Styling"],
+        year: "Live",
+    },
+    {
+        id: "tourism-winnipeg",
+        icon: Globe,
+        color: "#5E8C6A",
+        title: "Tourism Winnipeg / Festival Organizers",
+        description: "Festival attendance figures and event data from official Tourism Winnipeg records.",
+        table: "Annual Tourism Report 2023",
+        url: "https://tourismwinnipeg.com",
+        metrics: ["Festival Attendance", "Cultural Event Data", "Visitor Statistics"],
+        year: "2023",
+    },
+];
+
+const METHODOLOGY_NOTES = [
+    {
+        title: "Office Rent Comparison",
+        body: "Office rent figures represent Class B average asking rates for office space in primary business districts. Winnipeg Exchange District vs. Toronto/Vancouver downtown core. Source: CBRE Q4 2024.",
+    },
+    {
+        title: "Salary & Disposable Income",
+        body: "Tax rate calculations use 2024 provincial + federal marginal rates at the entered salary band midpoint. Includes provincial income tax, CPP, and EI. Does not account for individual deductions.",
+    },
+    {
+        title: "Average Home Price",
+        body: "All home prices represent city-wide residential average sale price, not specific neighbourhood. Winnipeg $350K is the 2024 annual average. Source: CREA.",
+    },
+    {
+        title: "Commute Data",
+        body: "Average commute times from Statistics Canada 2021 National Household Survey Journey to Work data. Represents one-way commute duration for employed full-time workers in each CMA.",
+    },
+];
+
+export default function DataTransparencyPage() {
+    return (
+        <div className="p-6 md:p-8 flex flex-col gap-8">
+            {/* Header */}
+            <div className="max-w-2xl">
+                <SectionHeader
+                    eyebrow="Data Transparency"
+                    title="Every Figure Is Sourced"
+                    subtitle="This platform makes claims with numbers attached. Here is where every number comes from. Open data, public records, and government statistics — no editorial inflation."
+                />
+                <InsightBanner variant="insight">
+                    We believe persuasion built on real data is both more ethical and more effective. Every city comparison,
+                    cost figure, and lifestyle claim in this platform can be independently verified from the sources below.
+                </InsightBanner>
+            </div>
+
+            {/* Source cards grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {SOURCES.map((source) => {
+                    const Icon = source.icon;
+                    return (
+                        <DataCard key={source.id} hover>
+                            <div className="flex items-start gap-3">
+                                <div
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                    style={{ background: source.color + "20" }}
+                                >
+                                    <Icon size={18} style={{ color: source.color }} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                        <p
+                                            className="text-[14px] font-semibold text-frost-white leading-snug"
+                                            style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                        >
+                                            {source.title}
+                                        </p>
+                                        <ExternalLink size={13} className="flex-shrink-0 text-concrete-gray/50 mt-0.5" />
+                                    </div>
+                                    <p
+                                        className="text-[12px] text-concrete-gray leading-snug mb-3"
+                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                    >
+                                        {source.description}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5 mb-2">
+                                        {source.metrics.map((m) => (
+                                            <span
+                                                key={m}
+                                                className="text-[10px] px-2 py-0.5 rounded-full border"
+                                                style={{
+                                                    fontFamily: "var(--font-ibm-sans)",
+                                                    color: source.color,
+                                                    borderColor: source.color + "30",
+                                                    background: source.color + "10",
+                                                }}
+                                            >
+                                                {m}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span
+                                            className="text-[11px] text-concrete-gray/60"
+                                            style={{ fontFamily: "var(--font-ibm-mono)" }}
+                                        >
+                                            {source.table} · {source.year}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </DataCard>
+                    );
+                })}
+            </div>
+
+            {/* Methodology */}
+            <div>
+                <SectionHeader
+                    eyebrow="Methodology"
+                    title="How We Calculate"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {METHODOLOGY_NOTES.map((note) => (
+                        <DataCard key={note.title}>
+                            <p
+                                className="text-[13px] font-semibold text-frost-white mb-2"
+                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                            >
+                                {note.title}
+                            </p>
+                            <p
+                                className="text-[12px] text-concrete-gray leading-relaxed"
+                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                            >
+                                {note.body}
+                            </p>
+                        </DataCard>
+                    ))}
+                </div>
+            </div>
+
+            {/* Footer banner */}
+            <div
+                className="rounded-xl p-6 border text-center"
+                style={{
+                    background: "rgba(178,58,43,0.06)",
+                    borderColor: "rgba(178,58,43,0.2)",
+                }}
+            >
+                <p
+                    className="text-[11px] font-semibold uppercase tracking-widest text-exchange-brick mb-3"
+                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                >
+                    Powered by Open Data
+                </p>
+                <p
+                    className="text-xl font-bold text-frost-white mb-2"
+                    style={{ fontFamily: "var(--font-display)" }}
+                >
+                    The case for Winnipeg doesn&apos;t need embellishment.
+                </p>
+                <p
+                    className="text-[14px] text-concrete-gray max-w-lg mx-auto"
+                    style={{ fontFamily: "var(--font-ibm-sans)" }}
+                >
+                    Every figure cited in this platform is available to the public, free of charge, from Statistics Canada,
+                    CREA, CBRE, and Environment Canada. We just put it in the same room as the decision-maker.
+                </p>
+            </div>
+        </div>
+    );
+}

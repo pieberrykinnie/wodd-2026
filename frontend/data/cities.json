@@ -1,0 +1,90 @@
+[
+  {
+    "id": "toronto",
+    "name": "Toronto",
+    "province": "ON",
+    "coords": [-79.3832, 43.6532],
+    "costIndex": 142,
+    "homePrice": 1100000,
+    "officeSqft": 42,
+    "avgCommute": 75,
+    "avgSalary": 95000,
+    "monthlyRent2br": 3200,
+    "taxRate": 0.476,
+    "color": "#8B98A5",
+    "climate": "Humid Continental",
+    "sunshineHours": 2066,
+    "transitScore": 83,
+    "walkscore": 72,
+    "comparisons": {
+      "vs_winnipeg_office_savings_pct": 62,
+      "vs_winnipeg_home_savings_pct": 68,
+      "vs_winnipeg_commute_delta": 55
+    }
+  },
+  {
+    "id": "vancouver",
+    "name": "Vancouver",
+    "province": "BC",
+    "coords": [-123.1207, 49.2827],
+    "costIndex": 156,
+    "homePrice": 1400000,
+    "officeSqft": 48,
+    "avgCommute": 62,
+    "avgSalary": 90000,
+    "monthlyRent2br": 3800,
+    "taxRate": 0.462,
+    "color": "#4C6E91",
+    "climate": "Oceanic",
+    "sunshineHours": 1938,
+    "transitScore": 79,
+    "walkscore": 78,
+    "comparisons": {
+      "vs_winnipeg_office_savings_pct": 67,
+      "vs_winnipeg_home_savings_pct": 75,
+      "vs_winnipeg_commute_delta": 42
+    }
+  },
+  {
+    "id": "montreal",
+    "name": "Montréal",
+    "province": "QC",
+    "coords": [-73.5673, 45.5017],
+    "costIndex": 118,
+    "homePrice": 650000,
+    "officeSqft": 28,
+    "avgCommute": 52,
+    "avgSalary": 82000,
+    "monthlyRent2br": 2100,
+    "taxRate": 0.497,
+    "color": "#5E8C6A",
+    "climate": "Humid Continental",
+    "sunshineHours": 2051,
+    "transitScore": 89,
+    "walkscore": 64,
+    "comparisons": {
+      "vs_winnipeg_office_savings_pct": 43,
+      "vs_winnipeg_home_savings_pct": 46,
+      "vs_winnipeg_commute_delta": 32
+    }
+  },
+  {
+    "id": "winnipeg",
+    "name": "Winnipeg",
+    "province": "MB",
+    "coords": [-97.1384, 49.8951],
+    "costIndex": 88,
+    "homePrice": 350000,
+    "officeSqft": 16,
+    "avgCommute": 20,
+    "avgSalary": 82000,
+    "monthlyRent2br": 1450,
+    "taxRate": 0.439,
+    "color": "#B23A2B",
+    "climate": "Semi-Arid Continental",
+    "sunshineHours": 2353,
+    "transitScore": 61,
+    "walkscore": 55,
+    "comparisons": {}
+  }
+]
