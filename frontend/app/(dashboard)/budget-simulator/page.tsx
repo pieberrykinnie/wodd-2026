@@ -31,6 +31,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 export default function BudgetSimulatorPage() {
   const store = useCompanyStore();
@@ -128,22 +129,12 @@ export default function BudgetSimulatorPage() {
   return (
     <div className="p-6 md:p-8 flex flex-col gap-0">
       <div className="mb-7">
-        <p
-          className="text-[11px] font-semibold uppercase tracking-widest mb-1"
-          style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
-        >
-          Budget Simulator
-        </p>
-        <h1
-          className="text-2xl font-bold leading-tight mb-1"
-          style={{ color: "#0F1823", fontFamily: "var(--font-ibm-sans)" }}
-        >
-          Relocation Financial Analysis
-        </h1>
-        <p className="text-sm" style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}>
-          Finance-grade line-item breakdown across six cost categories &mdash;{" "}
-          <span style={{ color: "#4C6E91" }}>{city.name}</span> &rarr; Winnipeg, MB
-        </p>
+        <SectionHeader
+          eyebrow="Budget Simulator"
+          number="3"
+          title="Relocation Financial Analysis"
+          subtitle="Finance grade line-item breakdown across six cost categories."
+        />
       </div>
 
       <div
@@ -209,7 +200,7 @@ export default function BudgetSimulatorPage() {
                   value={employees}
                   min={1}
                   max={10000}
-                  unit="people"
+                  // unit="people"
                   onChange={setEmployees}
                 />
                 <NumericField
@@ -217,7 +208,7 @@ export default function BudgetSimulatorPage() {
                   value={avgSalary}
                   min={30000}
                   max={500000}
-                  unit="CAD"
+                  // unit="CAD"
                   prefix="$"
                   onChange={setAvgSalary}
                 />
@@ -226,12 +217,12 @@ export default function BudgetSimulatorPage() {
                   value={sqftPerEmployee}
                   min={50}
                   max={500}
-                  unit="sqft"
+                  // unit="sqft"
                   onChange={setSqftPerEmployee}
                 />
                 <div>
                   <label
-                    className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider mb-2 block"
+                    className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider mb-2"
                     style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
                   >
                     <MapPin size={11} />
@@ -240,12 +231,13 @@ export default function BudgetSimulatorPage() {
                   <select
                     value={selectedZone}
                     onChange={(e) => setSelectedZone(e.target.value)}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none appearance-none"
                     style={{
                       background: "rgba(241,244,247,0.8)",
                       color: "#0F1823",
                       border: "1px solid rgba(0,0,0,0.12)",
                       fontFamily: "var(--font-ibm-sans)",
+                      height: "38px",
                     }}
                   >
                     {zones.map((z) => (
@@ -364,7 +356,7 @@ export default function BudgetSimulatorPage() {
         * MEDITC shown as estimated benefit where applicable (Province of Manitoba Digital Media Tax Credit).
         All figures in CAD. Sources: Statistics Canada, CBRE 2025 Office Market Report, CREA 2025, JLL 2024, SHRM 2024.
       </p>
-    </div>
+    </div >
   );
 }
 
@@ -672,7 +664,7 @@ function NumericField({
   value: number;
   min: number;
   max: number;
-  unit: string;
+  unit?: string;
   prefix?: string;
   onChange: (v: number) => void;
 }) {
@@ -712,9 +704,11 @@ function NumericField({
           }}
         />
       </div>
-      <p className="text-[10px] mt-0.5" style={{ color: "#4A5664", fontFamily: "var(--font-ibm-sans)" }}>
-        {unit}
-      </p>
+      {unit && (
+        <p className="text-[10px] mt-0.5" style={{ color: "#4A5664", fontFamily: "var(--font-ibm-sans)" }}>
+          {unit}
+        </p>
+      )}
     </div>
   );
 }

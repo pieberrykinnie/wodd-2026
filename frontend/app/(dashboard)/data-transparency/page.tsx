@@ -273,20 +273,20 @@ export default function DataTransparencyPage() {
             {/* Screen 9 — Data Transparency Footer */}
             <div
                 className="-mx-6 md:-mx-8 -mb-4"
-                style={{ background: "#1C2A39" }}
+                style={{ background: "#F1F4F7" }}
             >
                 <div className="px-6 md:px-8 py-10 flex flex-col md:flex-row md:items-end gap-8">
                     {/* Left: heading + badges + tagline */}
                     <div className="flex-1">
                         <p
                             className="text-[10px] font-semibold uppercase tracking-widest mb-3"
-                            style={{ color: "rgba(185,148,69,0.55)", fontFamily: "var(--font-ibm-mono)" }}
+                            style={{ color: "#4C6E91", fontFamily: "var(--font-ibm-mono)" }}
                         >
                             Screen 9 — Data Transparency
                         </p>
                         <h2
-                            className="font-bold text-white mb-6 leading-tight"
-                            style={{ fontFamily: "var(--font-display)", fontSize: 28 }}
+                            className="font-bold mb-6 leading-tight"
+                            style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "#0F1823" }}
                         >
                             Powered by Open Data
                         </h2>
@@ -304,9 +304,9 @@ export default function DataTransparencyPage() {
                                     key={src}
                                     className="px-3 py-1.5 rounded-full text-[12px] font-semibold"
                                     style={{
-                                        background: "rgba(255,255,255,0.07)",
-                                        color: "#C8A44D",
-                                        border: "1px solid rgba(200,164,77,0.25)",
+                                        background: "rgba(76,110,145,0.08)",
+                                        color: "#4C6E91",
+                                        border: "1px solid rgba(76,110,145,0.25)",
                                         fontFamily: "var(--font-ibm-sans)",
                                         letterSpacing: "0.01em",
                                     }}
@@ -319,7 +319,7 @@ export default function DataTransparencyPage() {
                         {/* Tagline */}
                         <p
                             className="text-[16px] italic"
-                            style={{ color: "#8B98A5", fontFamily: "var(--font-ibm-sans)" }}
+                            style={{ color: "#64748B", fontFamily: "var(--font-ibm-sans)" }}
                         >
                             Every figure is sourced. Every recommendation is defensible.
                         </p>
@@ -329,24 +329,24 @@ export default function DataTransparencyPage() {
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                         <div
                             className="px-4 py-2 rounded"
-                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                            style={{ background: "rgba(76,110,145,0.06)", border: "1px solid rgba(76,110,145,0.18)" }}
                         >
                             <p
                                 className="text-[18px] font-bold leading-none tracking-tight"
-                                style={{ color: "#C8A44D", fontFamily: "var(--font-display)" }}
+                                style={{ color: "#4C6E91", fontFamily: "var(--font-display)" }}
                             >
                                 WRI
                             </p>
                             <p
                                 className="text-[9px] uppercase tracking-widest mt-0.5"
-                                style={{ color: "rgba(200,164,77,0.55)", fontFamily: "var(--font-ibm-mono)" }}
+                                style={{ color: "rgba(76,110,145,0.6)", fontFamily: "var(--font-ibm-mono)" }}
                             >
                                 Winnipeg Relocation Intelligence
                             </p>
                         </div>
                         <p
                             className="text-[10px]"
-                            style={{ color: "rgba(139,152,165,0.45)", fontFamily: "var(--font-ibm-mono)" }}
+                            style={{ color: "rgba(100,116,139,0.55)", fontFamily: "var(--font-ibm-mono)" }}
                         >
                             wodd-2026 · open data
                         </p>

@@ -229,12 +229,27 @@ async def get_zone_detail(zone_id: str) -> ZoneDetail | None:
                     else:
                         route_names.append(str(r))
 
+            centre = s.get("centre", {})
+            geo = centre.get("geographic", {})
+            stop_lat: float | None = None
+            stop_lng: float | None = None
+            try:
+                raw_lat = geo.get("latitude")
+                raw_lng = geo.get("longitude")
+                if raw_lat is not None and raw_lng is not None:
+                    stop_lat = float(raw_lat) or None
+                    stop_lng = float(raw_lng) or None
+            except (ValueError, TypeError):
+                pass
+
             nearby_stops.append(
                 TransitStopInfo(
                     stop_number=int(stop_key),
                     name=stop_name,
                     distance_m=distance_m,
                     routes=route_names,
+                    lat=stop_lat,
+                    lng=stop_lng,
                 )
             )
     except Exception:

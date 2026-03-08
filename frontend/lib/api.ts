@@ -95,7 +95,6 @@ export interface Festival {
   description: string;
   attendance: string;
   neighborhood: string;
-  emoji: string;
 }
 
 // ── Data Accessors ──────────────────────────────────────────
@@ -209,6 +208,8 @@ export interface ZoneDetail extends ZoneSummary {
     name: string;
     distance_m: number;
     routes: string[];
+    lat?: number;
+    lng?: number;
   }>;
   avg_year_built?: number;
 }

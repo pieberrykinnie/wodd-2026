@@ -1,28 +1,72 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useCompanyStore } from "@/store/useCompanyStore";
-import { getCityById, getNeighborhoods, type Neighborhood } from "@/lib/api";
+import {
+    getNeighborhoods,
+    fetchZones,
+    fetchZoneDetail,
+    type Neighborhood,
+    type ZoneDetail,
+} from "@/lib/api";
+import { Car, Train } from "lucide-react";
 import PersonaTag from "@/components/ui/PersonaTag";
-import { Car, Train, Clock } from "lucide-react";
+import type { TransitStop, OfficeZone } from "@/components/maps/CommuteMap";
 
-const PERSONA_ZONE_IDS = ["exchange-district", "river-heights", "tuxedo", "st-vital"];
+const CommuteMap = dynamic(() => import("@/components/maps/CommuteMap"), { ssr: false });
+
+function commuteColor(mins: number): string {
+    if (mins <= 15) return "#5E8C6A";
+    if (mins <= 25) return "#B99445";
+    return "#B23A2B";
+}
 
 export default function CommutePage() {
-    const { cityId } = useCompanyStore();
-    const city = getCityById(cityId) ?? getCityById("toronto")!;
-    const all = getNeighborhoods();
-    const zones = PERSONA_ZONE_IDS.map((id) => all.find((n) => n.id === id)!).filter(Boolean);
+    const { selectedZoneId } = useCompanyStore();
+    const effectiveZoneId = selectedZoneId ?? "exchange-district";
 
-    const commuteDelta = city.avgCommute - 20;
-    const annualHoursRecovered = Math.round((commuteDelta * 2 * 240) / 60);
+    const neighborhoods = getNeighborhoods();
+    const [officeZone, setOfficeZone] = useState<OfficeZone | null>(null);
+    const [zoneDetail, setZoneDetail] = useState<ZoneDetail | null>(null);
+    const [activeId, setActiveId] = useState<string>(neighborhoods[0]?.id ?? "");
+    const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+    useEffect(() => {
+        let cancelled = false;
+        async function load() {
+            const [zones, detail] = await Promise.all([
+                fetchZones(),
+                fetchZoneDetail(effectiveZoneId),
+            ]);
+            if (cancelled) return;
+            const found = zones.find((z) => z.id === effectiveZoneId);
+            setOfficeZone(
+                found
+                    ? { id: found.id, name: found.name, lat: found.lat, lng: found.lng }
+                    : { id: "exchange-district", name: "Exchange District", lat: 49.8992, lng: -97.1384 }
+            );
+            setZoneDetail(detail);
+        }
+        load();
+        return () => { cancelled = true; };
+    }, [effectiveZoneId]);
+
+    function handleSelectNeighborhood(id: string) {
+        setActiveId(id);
+        cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    const transitStops: TransitStop[] = (zoneDetail?.nearby_transit_stops ?? []) as TransitStop[];
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="p-6 md:p-8"
+            className="p-6 md:p-8 flex flex-col"
+            style={{ minHeight: "calc(100vh - 80px)" }}
         >
             {/* Screen label */}
             <p
@@ -32,157 +76,84 @@ export default function CommutePage() {
                 Screen 6 — Commute Optimization
             </p>
 
-            {/* Full-width two-panel card */}
+            {/* Two-panel card */}
             <div
-                className="rounded-xl overflow-hidden"
+                className="rounded-xl overflow-hidden flex-1"
                 style={{
                     background: "#FFFFFF",
                     border: "1px solid #E8EDF2",
                     boxShadow: "0 4px 24px rgba(15,24,35,0.08)",
+                    minHeight: 580,
                 }}
             >
-                <div className="flex flex-col lg:flex-row min-h-[520px]">
+                <div className="flex flex-col lg:flex-row h-full" style={{ minHeight: 580 }}>
 
-                    {/* ── LEFT HALF: Bar charts ── */}
-                    <div className="lg:w-1/2 p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-100">
-                        <div>
+                    {/* ── LEFT: Map (60%) ── */}
+                    <div className="flex flex-col lg:w-[60%] border-b lg:border-b-0 lg:border-r border-gray-100">
+                        <div className="px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
                             <p
-                                className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-2"
-                                style={{ fontFamily: "var(--font-ibm-sans)" }}
+                                className="text-[11px] font-semibold uppercase tracking-widest mb-1"
+                                style={{ color: "#8A9AB0", fontFamily: "var(--font-ibm-sans)" }}
                             >
-                                Commute Optimization
+                                Live Commute Map
                             </p>
                             <h2
-                                className="text-[34px] font-bold text-frost-white leading-tight mb-10"
-                                style={{ fontFamily: "var(--font-display)" }}
+                                className="text-[22px] font-bold leading-tight"
+                                style={{ color: "#0F1823", fontFamily: "var(--font-display)" }}
                             >
-                                Time Is the<br />Hidden Benefit
+                                Routes to {officeZone?.name ?? "…"}
                             </h2>
-
-                            <div className="space-y-8">
-                                {/* City bar */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2.5">
-                                            <span className="text-2xl leading-none" role="img" aria-label="stressed">😫</span>
-                                            <span
-                                                className="text-[15px] font-semibold text-frost-white"
-                                                style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                            >
-                                                {city.name}
-                                            </span>
-                                        </div>
-                                        <span
-                                            className="text-[13px] font-semibold"
-                                            style={{ color: "#B23A2B", fontFamily: "var(--font-ibm-mono)" }}
-                                        >
-                                            60–90 min
-                                        </span>
-                                    </div>
-                                    <div className="h-10 rounded-md overflow-hidden" style={{ background: "#F1F4F7" }}>
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "85%" }}
-                                            transition={{ duration: 1.0, ease: "easeOut", delay: 0.3 }}
-                                            className="h-full rounded-md flex items-center justify-end pr-4"
-                                            style={{ background: "linear-gradient(90deg, #B23A2B 0%, #C4453A 100%)" }}
-                                        >
-                                            <span
-                                                className="text-white text-[11px] font-semibold"
-                                                style={{ fontFamily: "var(--font-ibm-mono)" }}
-                                            >
-                                                {city.avgCommute} min avg
-                                            </span>
-                                        </motion.div>
-                                    </div>
-                                </div>
-
-                                {/* Winnipeg bar */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2.5">
-                                            <span className="text-2xl leading-none" role="img" aria-label="relaxed">😊</span>
-                                            <span
-                                                className="text-[15px] font-semibold text-frost-white"
-                                                style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                            >
-                                                Winnipeg
-                                            </span>
-                                        </div>
-                                        <span
-                                            className="text-[13px] font-semibold"
-                                            style={{ color: "#5E8C6A", fontFamily: "var(--font-ibm-mono)" }}
-                                        >
-                                            15–25 min
-                                        </span>
-                                    </div>
-                                    <div className="h-10 rounded-md overflow-hidden" style={{ background: "#F1F4F7" }}>
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "27%" }}
-                                            transition={{ duration: 1.0, ease: "easeOut", delay: 0.5 }}
-                                            className="h-full rounded-md flex items-center justify-end pr-4"
-                                            style={{ background: "linear-gradient(90deg, #5E8C6A 0%, #6EA880 100%)" }}
-                                        >
-                                            <span
-                                                className="text-white text-[11px] font-semibold"
-                                                style={{ fontFamily: "var(--font-ibm-mono)" }}
-                                            >
-                                                20 min avg
-                                            </span>
-                                        </motion.div>
-                                    </div>
-                                </div>
-                            </div>
+                            {zoneDetail?.transit_stop_count != null && (
+                                <p
+                                    className="text-[12px] mt-0.5"
+                                    style={{ color: "#8A9AB0", fontFamily: "var(--font-ibm-sans)" }}
+                                >
+                                    {zoneDetail.transit_stop_count} live transit stops within 500m
+                                </p>
+                            )}
                         </div>
 
-                        {/* Hours callout */}
-                        <div
-                            className="mt-8 p-5 rounded-xl flex items-center gap-4"
-                            style={{ background: "#F7F9FB", border: "1px solid #E8EDF2" }}
-                        >
-                            <div
-                                className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
-                                style={{ background: "rgba(185,148,69,0.12)" }}
-                            >
-                                <Clock size={20} style={{ color: "#B99445" }} />
-                            </div>
-                            <div>
-                                <p
-                                    className="text-[26px] font-bold leading-tight"
-                                    style={{ color: "#B99445", fontFamily: "var(--font-ibm-mono)" }}
-                                >
-                                    {annualHoursRecovered} hrs
-                                    <span
-                                        className="text-[14px] text-concrete-gray font-normal ml-1.5"
-                                        style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                    >
-                                        /year recovered
-                                    </span>
-                                </p>
-                                <p
-                                    className="text-[12px] text-concrete-gray"
-                                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                                >
-                                    Per employee — worth $8K–$14K in hidden salary
-                                </p>
-                            </div>
+                        {/* Map canvas */}
+                        <div className="flex-1" style={{ minHeight: 400 }}>
+                            {officeZone ? (
+                                <CommuteMap
+                                    officeZone={officeZone}
+                                    neighborhoods={neighborhoods}
+                                    transitStops={transitStops}
+                                    activeNeighborhoodId={activeId}
+                                    onSelectNeighborhood={handleSelectNeighborhood}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 400 }}>
+                                    <div
+                                        className="w-6 h-6 rounded-full border-2 animate-spin"
+                                        style={{ borderColor: "#B99445", borderTopColor: "transparent" }}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* ── RIGHT HALF: Route cards ── */}
-                    <div
-                        className="flex-1 p-6 lg:p-8 flex flex-col"
-                        style={{ background: "#F7F9FB" }}
-                    >
-                        <p
-                            className="text-[11px] font-semibold uppercase tracking-widest text-concrete-gray mb-5"
-                            style={{ fontFamily: "var(--font-ibm-sans)" }}
-                        >
-                            Neighbourhood Routes → Downtown Winnipeg
-                        </p>
-                        <div className="flex flex-col gap-3 flex-1 justify-center">
-                            {zones.map((n) => <RouteCard key={n.id} n={n} />)}
+                    {/* ── RIGHT: Route cards (40%) ── */}
+                    <div className="flex flex-col lg:w-[40%]" style={{ background: "#F7F9FB" }}>
+                        <div className="px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
+                            <p
+                                className="text-[11px] font-semibold uppercase tracking-widest"
+                                style={{ color: "#8A9AB0", fontFamily: "var(--font-ibm-sans)" }}
+                            >
+                                Neighbourhood Routes → {officeZone?.name ?? "Downtown"}
+                            </p>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                            {neighborhoods.map((n) => (
+                                <RouteCard
+                                    key={n.id}
+                                    n={n}
+                                    isActive={n.id === activeId}
+                                    setRef={(el) => { cardRefs.current[n.id] = el; }}
+                                    onClick={() => setActiveId(n.id)}
+                                />
+                            ))}
                         </div>
                     </div>
 
@@ -192,100 +163,83 @@ export default function CommutePage() {
     );
 }
 
-// ── SVG mini dark map thumbnail ──────────────────────────────────
-function MapThumbnail({ commuteMins }: { commuteMins: number }) {
-    const isShort = commuteMins < 15;
-    return (
-        <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 64 84"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: "block", background: "#1C2A39" }}
-        >
-            {/* Grid lines */}
-            {[14, 28, 42, 56, 70].map((y) => (
-                <line key={`h${y}`} x1="0" y1={y} x2="64" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-            ))}
-            {[16, 32, 48].map((x) => (
-                <line key={`v${x}`} x1={x} y1="0" x2={x} y2="84" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-            ))}
-            {/* Dashed route */}
-            <line
-                x1="18" y1="68"
-                x2="46" y2="16"
-                stroke={isShort ? "#5E8C6A" : "#B99445"}
-                strokeWidth="1.5"
-                strokeDasharray="3 2.5"
-                opacity="0.75"
-            />
-            {/* Downtown dot (destination) */}
-            <circle cx="46" cy="16" r="4.5" fill="#1C2A39" stroke="#5E8C6A" strokeWidth="1.5" />
-            <circle cx="46" cy="16" r="2" fill="#5E8C6A" />
-            {/* Neighbourhood dot (origin) */}
-            <circle cx="18" cy="68" r="4.5" fill="#B99445" opacity="0.9" />
-            <circle cx="18" cy="68" r="8" stroke="#B99445" strokeWidth="0.75" opacity="0.2" />
-        </svg>
-    );
-}
-
-// ── Route card ───────────────────────────────────────────────────
-function RouteCard({ n }: { n: Neighborhood }) {
+function RouteCard({
+    n,
+    isActive,
+    setRef,
+    onClick,
+}: {
+    n: Neighborhood;
+    isActive: boolean;
+    setRef: (el: HTMLDivElement | null) => void;
+    onClick: () => void;
+}) {
+    const color = commuteColor(n.commuteMins);
     return (
         <div
-            className="rounded-lg overflow-hidden flex"
+            ref={setRef}
+            onClick={onClick}
+            className="rounded-lg p-4 cursor-pointer transition-all"
             style={{
                 background: "#FFFFFF",
-                border: "1px solid #E8EDF2",
-                boxShadow: "0 1px 6px rgba(15,24,35,0.05)",
-                minHeight: 88,
+                border: isActive ? `2px solid ${color}` : "1px solid #E8EDF2",
+                boxShadow: isActive ? `0 2px 12px ${color}22` : "0 1px 4px rgba(15,24,35,0.04)",
             }}
         >
-            {/* Map thumbnail */}
-            <div className="w-16 flex-shrink-0">
-                <MapThumbnail commuteMins={n.commuteMins} />
-            </div>
-            <div className="w-px bg-gray-100 flex-shrink-0" />
-
-            {/* Content */}
-            <div className="flex-1 px-4 py-3 flex flex-col justify-center gap-2">
-                <p
-                    className="text-[13px] font-semibold text-frost-white"
-                    style={{ fontFamily: "var(--font-ibm-sans)" }}
-                >
-                    {n.name}
-                </p>
-                <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-start justify-between mb-2.5">
+                <div className="flex flex-col gap-1">
+                    <p
+                        className="text-[14px] font-semibold"
+                        style={{ color: "#0F1823", fontFamily: "var(--font-ibm-sans)" }}
+                    >
+                        {n.name}
+                    </p>
                     <PersonaTag persona={n.persona} />
-                    {/* Drive time chip */}
+                </div>
+                <span
+                    className="text-[15px] font-bold px-2.5 py-1 rounded-lg flex-shrink-0 ml-3"
+                    style={{
+                        background: color + "18",
+                        color,
+                        fontFamily: "var(--font-ibm-mono)",
+                    }}
+                >
+                    {n.commuteMins} min
+                </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
+                    style={{
+                        background: "rgba(47,62,79,0.08)",
+                        color: "#2F3E4F",
+                        fontFamily: "var(--font-ibm-mono)",
+                    }}
+                >
+                    <Car size={9} />
+                    {n.commuteMins} min drive
+                </span>
+                {n.transitRoutes.slice(0, 2).map((r) => (
                     <span
+                        key={r}
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
                         style={{
-                            background: "rgba(47,62,79,0.08)",
-                            color: "#2F3E4F",
+                            background: "rgba(94,140,106,0.12)",
+                            color: "#5E8C6A",
                             fontFamily: "var(--font-ibm-mono)",
                         }}
                     >
-                        <Car size={9} />
-                        {n.commuteMins} min
+                        <Train size={9} />
+                        Route {r}
                     </span>
-                    {/* Transit chip */}
-                    {n.transitRoutes.slice(0, 1).map((r) => (
-                        <span
-                            key={r}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
-                            style={{
-                                background: "rgba(94,140,106,0.12)",
-                                color: "#5E8C6A",
-                                fontFamily: "var(--font-ibm-mono)",
-                            }}
-                        >
-                            <Train size={9} />
-                            Route {r}
-                        </span>
-                    ))}
-                </div>
+                ))}
+                <span
+                    className="text-[10px] ml-auto"
+                    style={{ color: "#8A9AB0", fontFamily: "var(--font-ibm-sans)" }}
+                >
+                    Walk {n.walkScore}/100
+                </span>
             </div>
         </div>
     );
